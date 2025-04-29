@@ -11,4 +11,5 @@ module.exports = {
     message: "Failed",
     result: {},
   },
+  noAccess: "You dont have access!",
 };
