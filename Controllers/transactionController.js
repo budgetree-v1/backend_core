@@ -16,7 +16,7 @@ module.exports = {
       let ck = await db.User.findOne({ User: id });
       if (!ck) res.send({ ...failedResponse, message: noAccess });
       let fnd = await db.Transaction.find();
-      res.send({ ...successResponse, message: "", result: fnd });
+      res.send({ ...successResponse, message: "Transaction list fetched!", result: fnd });
     } catch (error) {
       console.log(error);
       res.send({ ...failedResponse, message: error.message || "Failed to access this!" });
