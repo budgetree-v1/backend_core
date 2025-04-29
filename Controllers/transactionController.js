@@ -4,6 +4,10 @@ const db = require("../Models");
 module.exports = {
   singlePayout: async (req, res) => {
     try {
+      let { id } = req.token;
+      let ck = await db.User.findOne({ User: id });
+      if (!ck) res.send({ ...failedResponse, message: noAccess });
+
       res.send({ ...successResponse, message: "", result: {} });
     } catch (error) {
       console.log(error);
