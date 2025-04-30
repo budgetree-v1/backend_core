@@ -1,5 +1,6 @@
 const { failedResponse, successResponse, noAccess } = require("../Configs");
 const db = require("../Models");
+const { processPayout } = require("../Services/Handler/payout");
 
 module.exports = {
   singlePayout: async (req, res) => {
@@ -8,7 +9,24 @@ module.exports = {
       let ck = await db.User.findOne({ User: id });
       if (!ck) res.send({ ...failedResponse, message: noAccess });
 
-      res.send({ ...successResponse, message: "", result: {} });
+      let { amount, mode, note, beneAcc, beneIfsc, vpa } = req.body;
+
+      let data = {
+        uId: id,
+        mode: mode,
+        amount: amount,
+        beneAcc: beneAcc,
+        beneIfsc: beneIfsc,
+        vpa: vpa,
+        note: note,
+      };
+
+      let callServe = await processPayout(data);
+      if (callServe.success) {
+        res.send({ ...successResponse, message: "Payment processing!", result: callServe.data });
+      } else {
+        res.send({ ...failedResponse, message: "Payment initiation failed", result: callServe.data });
+      }
     } catch (error) {
       console.log(error);
       res.send({ ...failedResponse, message: error.message || "Failed to access this!" });

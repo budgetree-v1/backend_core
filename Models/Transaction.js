@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const AutoIncrement = require("mongoose-sequence")(mongoose);
 
 const Transaction = new Schema(
   {
@@ -31,10 +32,16 @@ const Transaction = new Schema(
     beneVpa: String,
 
     sendType: Number, //1 app 2 api
+
+    partnerStatus: String,
+    partnerMessage: String,
+
+    tId: Number,
   },
   {
     timestamps: true,
   }
 );
 
+Transaction.plugin(AutoIncrement, { inc_field: "tId" });
 module.exports = mongoose.model("Transaction", Transaction);
