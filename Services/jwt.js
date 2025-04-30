@@ -30,7 +30,7 @@ module.exports = {
         return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
       }
       let verify = null;
-      if (req.token && req.token.isMember == true) {
+      if (req.token) {
         verify = req.token;
       } else {
         var token = req.headers.authorization;
@@ -39,19 +39,21 @@ module.exports = {
         token = token.replace("Bearer ", "");
         verify = jwt.verify(token, Secrete);
 
-        if (!verify || !verify.id) {
-          return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
-        }
-        if (!verify.user) {
-          return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
-        }
-
-        if (verify.user == 1) {
-          if (!verify.session) {
+        if (verify.auth == true) {
+          if (!verify || !verify.id) {
             return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
-          } else {
-            let ck = await db.User.count({ _id: verify.id, session: verify.session });
-            if (ck == 0) return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+          }
+          if (!verify.user) {
+            return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+          }
+
+          if (verify.user == 1) {
+            if (!verify.session) {
+              return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+            } else {
+              let ck = await db.User.count({ _id: verify.id, session: verify.session });
+              if (ck == 0) return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+            }
           }
         }
       }

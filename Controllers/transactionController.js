@@ -37,7 +37,7 @@ module.exports = {
       let { id } = req.token;
       let ck = await db.User.findOne({ User: id });
       if (!ck) res.send({ ...failedResponse, message: noAccess });
-      let fnd = await db.Transaction.find();
+      let fnd = await db.Transaction.find({ User: id });
       res.send({ ...successResponse, message: "Transaction list fetched!", result: fnd });
     } catch (error) {
       console.log(error);

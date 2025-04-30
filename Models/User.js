@@ -5,9 +5,10 @@ const User = new Schema(
   {
     firstName: String,
     lastName: String,
+    phone: String,
     email: String,
-    password: String,
     balance: Number,
+    session: Number,
 
     btUpiMin: Number,
     btUpi24999: Number,
