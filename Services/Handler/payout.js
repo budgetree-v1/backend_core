@@ -3,7 +3,16 @@ const db = require("../../Models");
 const { singlePayout } = require("../cashfree");
 
 module.exports = {
-  processPayout: async ({ uId = "", mode = "", amount = 0, beneAcc = "", beneIfsc = "", vpa = "", note = "", sendType = 1 }) => {
+  processPayout: async ({
+    uId = "",
+    mode = "",
+    amount = 0,
+    beneAcc = "",
+    beneIfsc = "",
+    vpa = "",
+    note = "",
+    sendType = 1,
+  }) => {
     try {
       let ck = await db.User.findOne({ _id: uId });
 
@@ -12,14 +21,22 @@ module.exports = {
       amount = parseFloat(parseFloat(amount).toFixed(2));
 
       if (!mode) return { success: false, message: "Mode mandatory!" };
-      if (!amount || amount < 0) return { success: false, message: "Amount should be greater than or equal to 1!" };
+      if (!amount || amount < 0)
+        return {
+          success: false,
+          message: "Amount should be greater than or equal to 1!",
+        };
 
       if (mode == "imps" || mode == "neft" || mode == "rtgs") {
-        if (!beneAcc) return { success: false, message: "Account number mandatory!" };
+        if (!beneAcc)
+          return { success: false, message: "Account number mandatory!" };
         if (!beneIfsc) return { success: false, message: "Ifsc mandatory!" };
         if (mode == "rtgs") {
           if (amount < 200000) {
-            return { status: false, message: `RTGS payment should be more than Rs.200000!` };
+            return {
+              status: false,
+              message: `RTGS payment should be more than Rs.200000!`,
+            };
           }
         }
       } else if (mode == "upi") {
@@ -99,15 +116,30 @@ module.exports = {
       }
       gst = gst;
       totalCharge = charge + gst;
-      let totalAmount = parseFloat(parseFloat(amount).toFixed(2)) + parseFloat(totalCharge.toFixed(2));
+      let totalAmount =
+        parseFloat(parseFloat(amount).toFixed(2)) +
+        parseFloat(totalCharge.toFixed(2));
 
-      let ckb = await db.User.count({ balance: { $gte: totalAmount }, _id: uId });
+      let ckb = await db.User.count({
+        balance: { $gte: totalAmount },
+        _id: uId,
+      });
       if (ckb == 0 && checkBal == 1) {
-        await db.Transaction.updateOne({ _id: crt._id }, { message: "Insufficiant balance!" });
+        await db.Transaction.updateOne(
+          { _id: crt._id },
+          { message: "Insufficiant balance!" }
+        );
         return { success: false, message: "Insufficiant balance!" };
       } else {
-        await db.Admin.updateOne({ income: 1 }, { $inc: { balance: parseFloat(totalCharge.toFixed(2)) } });
-        await db.User.updateOne({ _id: uId }, { $inc: { Balance: -parseFloat(totalAmount.toFixed(2)) } }, { new: true }).lean();
+        await db.Admin.updateOne(
+          { income: 1 },
+          { $inc: { balance: parseFloat(totalCharge.toFixed(2)) } }
+        );
+        await db.User.updateOne(
+          { _id: uId },
+          { $inc: { Balance: -parseFloat(totalAmount.toFixed(2)) } },
+          { new: true }
+        ).lean();
 
         let server = 1;
         let sr = await db.Server.findOne();
@@ -138,8 +170,15 @@ module.exports = {
               qry.partnerStatus = pay.data?.status || "";
               qry.partnerMessage = pay.data?.status_description || "";
 
-              await db.Admin.updateOne({ income: 1 }, { $inc: { balance: -parseFloat(totalCharge.toFixed(2)) } });
-              await db.User.updateOne({ _id: uId }, { $inc: { Balance: parseFloat(totalAmount.toFixed(2)) } }, { new: true }).lean();
+              await db.Admin.updateOne(
+                { income: 1 },
+                { $inc: { balance: -parseFloat(totalCharge.toFixed(2)) } }
+              );
+              await db.User.updateOne(
+                { _id: uId },
+                { $inc: { Balance: parseFloat(totalAmount.toFixed(2)) } },
+                { new: true }
+              ).lean();
             } else {
               qry.message = "Payment process pending!";
               qry.status = 2;
@@ -155,7 +194,8 @@ module.exports = {
       let ckt = await db.Transaction.findOne({ _id: crt._id });
 
       let out = {
-        status: ckt.status == 1 ? "SUCCESS" : ckt.status == 2 ? "PENDING" : "FAILED",
+        status:
+          ckt.status == 1 ? "SUCCESS" : ckt.status == 2 ? "PENDING" : "FAILED",
         message: ckt.message,
         amount: ckt.amount,
         charge: ckt.charge,
@@ -166,7 +206,10 @@ module.exports = {
 
       return { success: true, data: out };
     } catch (error) {
-      return { success: false, message: error.message || "Failed to process the payment!" };
+      return {
+        success: false,
+        message: error.message || "Failed to process the payment!",
+      };
     }
   },
 };

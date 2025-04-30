@@ -31,6 +31,7 @@ const apiRoutes = require("./Routes/index");
 
 app.use("/api/user", apiRoutes.userRoutes);
 app.use("/api/txn", apiRoutes.transactionRoutes);
+app.use("/api/qr", apiRoutes.generateQR);
 
 app.use((req, res) => {
   res.status(404).json({
@@ -43,7 +44,11 @@ app.use((req, res) => {
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack); // Log the error
-  res.json({ ...failedResponse, statusCode: 500, message: "Internal server error" });
+  res.json({
+    ...failedResponse,
+    statusCode: 500,
+    message: "Internal server error",
+  });
 });
 
 // MongoDB Connection

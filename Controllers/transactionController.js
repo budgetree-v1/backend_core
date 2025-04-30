@@ -29,9 +29,13 @@ module.exports = {
       }
     } catch (error) {
       console.log(error);
-      res.send({ ...failedResponse, message: error.message || "Failed to access this!" });
+      res.send({
+        ...failedResponse,
+        message: error.message || "Failed to access this!",
+      });
     }
   },
+
   listTransaction: async (req, res) => {
     try {
       let { id } = req.token;
@@ -41,7 +45,10 @@ module.exports = {
       res.send({ ...successResponse, message: "Transaction list fetched!", result: fnd });
     } catch (error) {
       console.log(error);
-      res.send({ ...failedResponse, message: error.message || "Failed to access this!" });
+      res.send({
+        ...failedResponse,
+        message: error.message || "Failed to access this!",
+      });
     }
   },
 };

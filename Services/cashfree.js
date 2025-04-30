@@ -1,8 +1,19 @@
 const axios = require("axios");
-const { cashfreeBase, cashfreeClientId, cashfreeClientSecret } = require("../Configs");
+const {
+  cashfreeBase,
+  cashfreeClientId,
+  cashfreeClientSecret,
+} = require("../Configs");
 
 module.exports = {
-  singlePayout: async ({ mode = "", amount = "", txnId = "", beneAcc = "", beneIfsc = "", vpa = "" }) => {
+  singlePayout: async ({
+    mode = "",
+    amount = "",
+    txnId = "",
+    beneAcc = "",
+    beneIfsc = "",
+    vpa = "",
+  }) => {
     try {
       let data = {
         transfer_id: txnId,
@@ -36,7 +47,10 @@ module.exports = {
       }
     } catch (error) {
       console.log(error);
-      return { success: false, message: error?.response?.data || error?.response || error };
+      return {
+        success: false,
+        message: error?.response?.data || error?.response || error,
+      };
     }
   },
 };

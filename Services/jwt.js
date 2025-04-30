@@ -27,7 +27,11 @@ module.exports = {
   verify: async (req, res, next) => {
     try {
       if (!req.headers || !req.headers.authorization) {
-        return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+        return res.json({
+          ...failedResponse,
+          statusCode: 401,
+          message: noAccess,
+        });
       }
       let verify = null;
       if (req.token) {
@@ -35,25 +39,28 @@ module.exports = {
       } else {
         var token = req.headers.authorization;
         var n = token.search("Bearer ");
-        if (n < 0) return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+        if (n < 0)
+          return res.json({
+            ...failedResponse,
+            statusCode: 401,
+            message: noAccess,
+          });
         token = token.replace("Bearer ", "");
         verify = jwt.verify(token, Secrete);
 
-        if (verify.auth == true) {
-          if (!verify || !verify.id) {
-            return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
-          }
-          if (!verify.user) {
-            return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
-          }
+        if (!verify || !verify.id) {
+          return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+        }
+        if (!verify.user) {
+          return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+        }
 
-          if (verify.user == 1) {
-            if (!verify.session) {
-              return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
-            } else {
-              let ck = await db.User.count({ _id: verify.id, session: verify.session });
-              if (ck == 0) return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
-            }
+        if (verify.user == 1) {
+          if (!verify.session) {
+            return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+          } else {
+            let ck = await db.User.count({ _id: verify.id, session: verify.session });
+            if (ck == 0) return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
           }
         }
       }
@@ -61,7 +68,11 @@ module.exports = {
       next();
     } catch (error) {
       console.log(error);
-      return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+      return res.json({
+        ...failedResponse,
+        statusCode: 401,
+        message: noAccess,
+      });
     }
   },
 };
