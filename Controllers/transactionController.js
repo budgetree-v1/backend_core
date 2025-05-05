@@ -49,6 +49,10 @@ module.exports = {
 
   bulkPayout: async (req, res) => {
     try {
+      let { id } = req.token;
+      let ck = await db.User.findOne({ _id: id });
+      if (!ck) res.send({ ...failedResponse, message: noAccess });
+
       const uploadedFile = req.file;
 
       if (!uploadedFile) {
@@ -68,7 +72,7 @@ module.exports = {
       //SEND MONEY USING SINGLE PAY
       const payoutPromises = savedData.map((item) => {
         const payoutData = {
-          uId: item._id,
+          uId: id,
           mode: item.TRANSFER_MODE,
           amount: item.AMOUNT,
           beneAcc: item.PAYEE_ACCOUNT_NUMBER,
@@ -218,11 +222,7 @@ module.exports = {
 
       const { beneficiary_id, bank_account_number, bank_ifsc } = req.query;
 
-      let callServe = await getBeneficiary(
-        beneficiary_id,
-        bank_account_number,
-        bank_ifsc
-      );
+      let callServe = await getBeneficiary(beneficiary_id, bank_account_number, bank_ifsc);
       if (callServe.success) {
         res.send({
           ...successResponse,
