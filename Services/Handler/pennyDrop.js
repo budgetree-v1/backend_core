@@ -29,6 +29,7 @@ module.exports = {
         beneAccount: beneAcc || "",
         beneIfsc: beneIfsc || "",
         beneName: "",
+        beneBank: "",
         benePhone: "",
         beneEmail: "",
         beneVpa: vpa || "",

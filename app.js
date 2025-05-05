@@ -7,7 +7,7 @@ const mongoose = require("mongoose");
 const helmet = require("helmet");
 require("dotenv").config();
 const { failedResponse } = require("./Configs");
-
+const helpers = require("./Services/Helper/pennyDropCron");
 // Initialize Express App
 const app = express();
 
@@ -63,6 +63,8 @@ mongoose
     console.error("❌ Could not connect to the database", err);
     process.exit(1);
   });
+
+helpers;
 
 // Start Server
 const port = process.env.PORT || 7777;

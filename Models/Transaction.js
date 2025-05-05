@@ -27,6 +27,7 @@ const Transaction = new Schema(
     beneAccount: String,
     beneIfsc: String,
     beneName: String,
+    beneBank: String,
     benePhone: String,
     beneEmail: String,
     beneVpa: String,
