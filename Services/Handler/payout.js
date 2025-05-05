@@ -76,6 +76,7 @@ module.exports = {
       };
 
       let crt = await db.Transaction.create(qry);
+
       let ref = `${txnRef}${crt.tId}`;
       await db.Transaction.updateOne({ _id: crt._id }, { txnId: ref });
 
@@ -120,21 +121,22 @@ module.exports = {
         parseFloat(parseFloat(amount).toFixed(2)) +
         parseFloat(totalCharge.toFixed(2));
 
-      let ckb = await db.User.count({
+      let ckb = await db.User.countDocuments({
         balance: { $gte: totalAmount },
         _id: uId,
       });
-      if (ckb == 0 && checkBal == 1) {
+      console.log("ckb", ckb);
+      if (ckb !== 0) {
         await db.Transaction.updateOne(
           { _id: crt._id },
-          { message: "Insufficiant balance!" }
+          { $set: { message: "Insufficient balance!" } }
         );
         return { success: false, message: "Insufficiant balance!" };
       } else {
-        await db.Admin.updateOne(
-          { income: 1 },
-          { $inc: { balance: parseFloat(totalCharge.toFixed(2)) } }
-        );
+        // await db.Admin.updateOne(
+        //   { income: 1 }, // Ensure this filter matches the correct document
+        //   { $inc: { balance: parseFloat(totalCharge.toFixed(2)) } }
+        // );
         await db.User.updateOne(
           { _id: uId },
           { $inc: { Balance: -parseFloat(totalAmount.toFixed(2)) } },
@@ -142,8 +144,8 @@ module.exports = {
         ).lean();
 
         let server = 1;
-        let sr = await db.Server.findOne();
-        if (sr) server = sr.payoutServer;
+        // let sr = await db.Server.findOne({});
+        // if (sr) server = sr.payoutServer;
 
         let qry = {
           status: 3,
@@ -206,6 +208,7 @@ module.exports = {
 
       return { success: true, data: out };
     } catch (error) {
+      console.log("error", error);
       return {
         success: false,
         message: error.message || "Failed to process the payment!",

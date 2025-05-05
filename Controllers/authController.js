@@ -7,12 +7,17 @@ module.exports = {
   register: async (req, res) => {
     try {
       let { phone } = req.body;
-      if (!phone) return res.send({ ...failedResponse, message: "Please enter valid phone" });
+      if (!phone)
+        return res.send({
+          ...failedResponse,
+          message: "Please enter valid phone",
+        });
 
-      let ck = await db.User.findOne({});
+      let ck = await db.User.findOne({ phone });
       console.log(ck);
 
-      if (ck) return res.send({ ...failedResponse, message: "Phone already exist!" });
+      if (ck)
+        return res.send({ ...failedResponse, message: "Phone already exist!" });
 
       let qry = {
         firstName: "",
@@ -45,33 +50,53 @@ module.exports = {
 
       //call otp service here rajat
 
-      return res.send({ ...successResponse, message: "OTP sent", result: {}, token: obj });
+      return res.send({
+        ...successResponse,
+        message: "OTP sent",
+        result: {},
+        token: obj,
+      });
     } catch (error) {}
   },
+
   login: async (req, res) => {
     try {
+      console.log("first");
       let { phone } = req.body;
-      if (!phone) return res.send({ ...failedResponse, message: "Please enter valid phone" });
+      if (!phone)
+        return res.send({
+          ...failedResponse,
+          message: "Please enter valid phone",
+        });
 
-      let ck = await db.User.findOne({ phone: phone, isActive: true });
+      let ck = await db.User.findOne({ phone: phone });
+      console.log(ck);
       if (!ck) return res.send({ ...failedResponse, message: noAccess });
 
       let obj = {
         phone: phone,
       };
       obj = jwt.generate(obj);
-      return res.send({ ...successResponse, message: "OTP sent", result: {}, token: obj });
-    } catch (error) {}
+      return res.send({
+        ...successResponse,
+        message: "OTP sent",
+        result: {},
+        token: obj,
+      });
+    } catch (error) {
+      throw new Error(error);
+    }
   },
   verifyOtp: async (req, res) => {
     try {
-      let { phone } = req.token;
+      let { phone } = req.body;
       if (!phone) return res.send({ ...failedResponse, message: noAccess });
 
       let { otp } = req.body;
-      if (!otp) return res.send({ ...failedResponse, message: "OTP mandatory!" });
+      if (!otp)
+        return res.send({ ...failedResponse, message: "OTP mandatory!" });
 
-      let ck = await db.User.findOne({ phone: phone, isActive: true });
+      let ck = await db.User.findOne({ phone: phone });
       if (!ck) return res.send({ ...failedResponse, message: noAccess });
 
       //validate otp here rajat
@@ -83,8 +108,15 @@ module.exports = {
         user: 1,
         session: ck.session + 1,
       };
-      obj = jwt.generate(obj);
-      return res.send({ ...successResponse, message: "OTP sent", result: ck, token: obj });
-    } catch (error) {}
+      obj =await jwt.generate(obj);
+      return res.send({
+        ...successResponse,
+        message: "OTP sent",
+        result: ck,
+        token: obj,
+      });
+    } catch (error) {
+      throw new Error(error);
+    }
   },
 };

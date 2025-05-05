@@ -3,5 +3,5 @@ module.exports = {
   transactionRoutes: require("./transactionRoutes"),
   transactionRoutes: require("./transactionRoutes"),
   walletRoutes: require("./walletRoutes"),
-  generateQR: require("./generateQR"),
+
 };
