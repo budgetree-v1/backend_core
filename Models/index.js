@@ -3,4 +3,7 @@ module.exports = {
   Transaction: require("./Transaction"),
   Beneficiary: require("./benificiary"),
   TransactionInitiate: require("./TransactionInitiate"),
+  Admin: require("./Admin"),
+  Server: require("./Server"),
+  api: require("./api"),
 };

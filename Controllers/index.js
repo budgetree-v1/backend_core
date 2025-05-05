@@ -3,4 +3,5 @@ module.exports = {
   transactionController: require("./transactionController"),
   walletController: require("./walletController"),
   uploadController: require("./uploadController"),
+  apiController: require("./apiController"),
 };

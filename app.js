@@ -31,6 +31,7 @@ const apiRoutes = require("./Routes/index");
 
 app.use("/api/user", apiRoutes.userRoutes);
 app.use("/api/txn", apiRoutes.transactionRoutes);
+app.use("/api", apiRoutes.api);
 
 app.use((req, res) => {
   res.status(404).json({
