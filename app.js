@@ -55,10 +55,7 @@ app.use((err, req, res, next) => {
 mongoose.Promise = global.Promise;
 
 mongoose
-  .connect(process.env.DB, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.DB)
   .then(() => {
     console.log("✅ Successfully connected to the database");
   })
