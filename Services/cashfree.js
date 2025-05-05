@@ -35,7 +35,7 @@ module.exports = {
   //GET BENEFICIARY
   getBeneficiary: async (beneficiary_id = "", bank_account_number = "", bank_ifsc = "") => {
     try {
-      const signature = generateSignature(cashfreeClientId, "./accountId_283823_public_key.pem");
+      const signature = generateSignature(cashfreeClientId, "../Keys/accountId_283823_public_key.pem");
       const response = await axios({
         method: "get",
         url: `${cashfreeBase}/beneficiary`,
@@ -89,7 +89,7 @@ module.exports = {
           beneficiary_postal_code: beneficiary_postal_code,
         },
       };
-      const signature = generateSignature(cashfreeClientId, "./accountId_283823_public_key.pem");
+      const signature = generateSignature(cashfreeClientId, "../Keys/accountId_283823_public_key.pem");
       const response = await axios({
         method: "post",
         url: `${cashfreeBase}/beneficiary`,
@@ -132,7 +132,7 @@ module.exports = {
           },
         },
       };
-      const signature = generateSignature(cashfreeClientId, "./accountId_283823_public_key.pem");
+      const signature = generateSignature(cashfreeClientId, "../Keys/accountId_283823_public_key.pem");
 
       const response = await axios({
         method: "post",
