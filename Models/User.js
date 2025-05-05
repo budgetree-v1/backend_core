@@ -22,6 +22,8 @@ const User = new Schema(
 
     btNeftMin: Number,
     btRtgsMin: Number,
+
+    btPennyDrop: Number,
   },
   {
     timestamps: true,

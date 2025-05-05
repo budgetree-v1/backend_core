@@ -18,6 +18,7 @@ module.exports = {
 
   txnRef: process.env.ENVMODE == "dev" ? "BTREFX00" : "BTREF00",
   currentGst: 18,
+  pennyDropPrice: 1,
   // cashfreeBase: process.env.ENVMODE == "dev" ? "https://sandbox.cashfree.com" : "",
   cashfreeBase: "https://sandbox.cashfree.com/payout",
 

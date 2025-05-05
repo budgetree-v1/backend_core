@@ -9,7 +9,7 @@ const Transaction = new Schema(
       ref: "User",
     },
     cusRef: String,
-    txnType: Number, //1 credit 2 debit
+    txnType: Number, //1 credit 2 debit 3pennydrop
     status: Number, //1 success 2 pending 3 failed
     utr: String,
     ref: String,
