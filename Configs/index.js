@@ -20,6 +20,7 @@ module.exports = {
   verificationRef: process.env.ENVMODE == "dev" ? "BTVERX00" : "BTVER00",
   currentGst: 18,
   pennyDropPrice: 1,
+  pennyLessPrice: 1,
   // cashfreeBase: process.env.ENVMODE == "dev" ? "https://sandbox.cashfree.com" : "",
   cashfreeBase: "https://sandbox.cashfree.com/",
 

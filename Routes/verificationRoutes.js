@@ -12,5 +12,7 @@ Router.post("/verifyAadhaarOtp", jwt.verify, VerificationController.verifyAadhaa
 Router.post("/verifyOcrDoument", jwt.verify, uploadController.upload.single("file"), VerificationController.verifyOcrDoument);
 Router.post("/verifyFaceMatch", jwt.verify, VerificationController.verifyFaceMatch);
 Router.post("/verifyUan", jwt.verify, VerificationController.verifyUan);
+Router.post("/verifyPennyless", jwt.verify, VerificationController.verifyPennyless);
+Router.post("/verifyPennydrop", jwt.verify, VerificationController.verifyPennydrop);
 
 module.exports = Router;

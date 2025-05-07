@@ -25,6 +25,7 @@ const User = new Schema(
     btRtgsMin: Number,
 
     btPennyDrop: Number,
+    btPennyLess: Number,
   },
   {
     timestamps: true,

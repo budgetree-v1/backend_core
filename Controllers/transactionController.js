@@ -4,7 +4,7 @@ const { processPayout } = require("../Services/Handler/payout");
 const { createBeneficiary, getBeneficiary } = require("../Services/cashfree");
 const { readFile } = require("fs/promises");
 const { parse } = require("csv-parse/sync");
-const { pennyDropHandler } = require("../Services/Handler/pennyDrop");
+const { pennyDropHandler, pennyLessHandler } = require("../Services/Handler/pennyDrop");
 
 module.exports = {
   singlePayout: async (req, res) => {
@@ -43,7 +43,7 @@ module.exports = {
         beneAcc: beneAcc,
         beneIfsc: beneIfsc,
         vpa: vpa,
-        note: note
+        note: note,
       };
 
       let callServe = await processPayout(data);
@@ -75,7 +75,7 @@ module.exports = {
       const fileContent = await fs.readFile(file.path, "utf-8");
       const records = parse(fileContent, {
         columns: true,
-        skip_empty_lines: true
+        skip_empty_lines: true,
       });
 
       const savedRecords = await db.TransactionInitiate.insertMany(records);
@@ -89,7 +89,7 @@ module.exports = {
             beneAcc: item.PAYEE_ACCOUNT_NUMBER,
             beneIfsc: item.PAYEE_IFSC,
             vpa: item.VPA || "",
-            note: item.REMARKS
+            note: item.REMARKS,
           };
 
           try {
@@ -99,8 +99,8 @@ module.exports = {
               {
                 $set: {
                   status: true,
-                  payoutResponse: response.data
-                }
+                  payoutResponse: response.data,
+                },
               }
             );
             return { id: item._id, status: "success", response: response.data };
@@ -110,8 +110,8 @@ module.exports = {
               {
                 $set: {
                   status: false,
-                  errorMessage: err.message
-                }
+                  errorMessage: err.message,
+                },
               }
             );
             return { id: item._id, status: "failed", response: err.message };
@@ -121,22 +121,33 @@ module.exports = {
 
       return res.status(200).json({
         message: "CSV processed",
-        data: results
+        data: results,
       });
     } catch (error) {
       console.error(error);
       return res.send({
         ...failedResponse,
-        message: error.message || "Failed to access this!"
+        message: error.message || "Failed to access this!",
       });
     }
   },
 
-  addBenificiary: async (req, res) => {
+  pennylesstest: async (req, res) => {
     try {
       let { id } = req.token;
 
-      let callServe = await pennyDropHandler({ uId: id, beneAcc: "67326232762882", beneIfsc: "IDIB000K202" });
+      let callServe = await pennyLessHandler({ uId: id, beneAcc: "923010067137038", beneIfsc: "UTIB0000006" });
+      return res.send({ ...successResponse, message: callServe });
+    } catch (error) {
+      console.log(error);
+      return res.send({ ...failedResponse, message: error.message || "Failed to access this!" });
+    }
+  },
+  pennydroptest: async (req, res) => {
+    try {
+      let { id } = req.token;
+
+      let callServe = await pennyDropHandler({ uId: id, beneAcc: "923010067137038", beneIfsc: "UTIB0000006" });
       return res.send({ ...successResponse, message: callServe });
     } catch (error) {
       console.log(error);
@@ -186,13 +197,13 @@ module.exports = {
       const skip = (page - 1) * limit;
 
       const total = await db.Beneficiary.countDocuments({
-        User: id
+        User: id,
       });
       const callServe = await db.Beneficiary.find({
-        User: id
+        User: id,
       })
         .sort({
-          createdAt: -1
+          createdAt: -1,
         })
         .skip(skip)
         .limit(limit);
@@ -202,13 +213,13 @@ module.exports = {
         message: "Beneficiary List!",
         result: callServe,
         totalPages: Math.ceil(total / limit),
-        totalItems: total
+        totalItems: total,
       });
     } catch (error) {
       console.log(error);
       return res.send({
         ...failedResponse,
-        message: error.message || "Failed to access this!"
+        message: error.message || "Failed to access this!",
       });
     }
   },
@@ -221,14 +232,14 @@ module.exports = {
       const skip = (page - 1) * limit;
 
       let user = await db.User.findOne({
-        _id: id
+        _id: id,
       });
       if (!user) return res.send({ ...failedResponse, message: noAccess });
 
       let transactions = await db.Transaction.find({ User: id }).sort({ createdAt: -1 }).skip(skip).limit(limit);
 
       const total = await db.Transaction.countDocuments({
-        User: id
+        User: id,
       });
 
       return res.send({ ...successResponse, message: "Transaction list fetched!", result: transactions, totalPages: Math.ceil(total / limit), totalItems: total });
@@ -236,7 +247,7 @@ module.exports = {
       console.log(error);
       return res.send({
         ...failedResponse,
-        message: error.message || "Failed to access this!"
+        message: error.message || "Failed to access this!",
       });
     }
   },
@@ -246,12 +257,12 @@ module.exports = {
         api: "easebuzz/payout",
         data: JSON.stringify(req.body),
         txnId: "",
-        heeader: ""
+        heeader: "",
       });
       return res.send({ ...successResponse, message: "Success", result: {} });
     } catch (error) {
       console.log(error);
       return res.send({ ...failedResponse, message: error.message || "Failed to access this!" });
     }
-  }
+  },
 };

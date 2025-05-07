@@ -309,7 +309,7 @@ module.exports = {
         phone: "",
       };
       const response = await axios({
-        method: "get",
+        method: "post",
         url: `${cashfreeBase}/verification/bank-account/async`,
         headers: {
           "Content-Type": "application/json",
@@ -366,9 +366,11 @@ module.exports = {
         name: name,
         phone: "",
       };
+      console.log(data);
+
       const response = await axios({
-        method: "get",
-        url: `${cashfreeBase}/verification/bank-account/bank-account/sync`,
+        method: "post",
+        url: `${cashfreeBase}/verification/bank-account/sync`,
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
