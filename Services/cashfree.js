@@ -3,6 +3,7 @@ const { cashfreeBase, cashfreeClientId, cashfreeClientSecret } = require("../Con
 const generateSignature = require("../utils/helper");
 const fs = require("fs");
 const FormData = require("form-data");
+const signature = generateSignature(cashfreeClientId, "./Keys/cashfree.pem");
 
 module.exports = {
   deleteBeneficiary: async ({ beneficiary_id = "" }) => {
@@ -129,11 +130,10 @@ module.exports = {
           },
         },
       };
-      const signature = generateSignature(cashfreeClientId, "./Keys/cashfree.pem");
 
       const response = await axios({
         method: "post",
-        url: `${cashfreeBase}/transfers`,
+        url: `${cashfreeBase}/payout/transfers`,
         headers: {
           "Content-Type": "application/json",
           "x-api-version": "2024-01-01",
@@ -167,6 +167,7 @@ module.exports = {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
           "x-client-secret": cashfreeClientSecret,
+          "X-Cf-Signature": signature,
         },
         data: data,
       });
@@ -177,8 +178,8 @@ module.exports = {
         return { success: false, data: response.data, message: response.data.message || "Failed to verify aadhaar" };
       }
     } catch (error) {
-      console.log(error);
-      return { success: false, message: error?.response?.data || error?.response || error };
+      console.log(error?.response?.data || error);
+      return { success: false, message: error?.response?.data?.message || error?.response?.data || error?.response || error };
     }
   },
   aadhaarVerifyOtp: async ({ ref = "", otp = "" }) => {
@@ -194,6 +195,7 @@ module.exports = {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
           "x-client-secret": cashfreeClientSecret,
+          "X-Cf-Signature": signature,
         },
         data: data,
       });
@@ -205,7 +207,7 @@ module.exports = {
       }
     } catch (error) {
       console.log(error);
-      return { success: false, message: error?.response?.data || error?.response || error };
+      return { success: false, message: error?.response?.data?.message || error?.response?.data || error?.response || error };
     }
   },
   panLite: async ({ pan = "", name = "", dob = "", ref = "" }) => {
@@ -223,6 +225,8 @@ module.exports = {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
           "x-client-secret": cashfreeClientSecret,
+          "X-Cf-Signature": signature,
+          "X-Cf-Signature": signature,
         },
         data: data,
       });
@@ -234,7 +238,7 @@ module.exports = {
       }
     } catch (error) {
       console.log(error);
-      return { success: false, message: error?.response?.data || error?.response || error };
+      return { success: false, message: error?.response?.data?.message || error?.response?.data || error?.response || error };
     }
   },
   panPremium: async ({ pan = "", name = "", ref = "" }) => {
@@ -251,9 +255,11 @@ module.exports = {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
           "x-client-secret": cashfreeClientSecret,
+          "X-Cf-Signature": signature,
         },
         data: data,
       });
+      console.log(response);
 
       if (response.data.status == "VALID") {
         return { success: true, data: response.data };
@@ -262,10 +268,10 @@ module.exports = {
       }
     } catch (error) {
       console.log(error);
-      return { success: false, message: error?.response?.data || error?.response || error };
+      return { success: false, message: error?.response?.data?.message || error?.response?.data || error?.response || error };
     }
   },
-  gstin: async ({ gstin = "" }) => {
+  gstinVerify: async ({ gstin = "" }) => {
     try {
       let data = {
         GSTIN: gstin,
@@ -278,6 +284,7 @@ module.exports = {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
           "x-client-secret": cashfreeClientSecret,
+          "X-Cf-Signature": signature,
         },
         data: data,
       });
@@ -289,7 +296,7 @@ module.exports = {
       }
     } catch (error) {
       console.log(error);
-      return { success: false, message: error?.response?.data || error?.response || error };
+      return { success: false, message: error?.response?.data?.message || error?.response?.data || error?.response || error };
     }
   },
   pennyDrop: async ({ accNo = "", ifsc = "", name = "", ref = "" }) => {
@@ -308,6 +315,7 @@ module.exports = {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
           "x-client-secret": cashfreeClientSecret,
+          "X-Cf-Signature": signature,
         },
         data: data,
       });
@@ -319,7 +327,7 @@ module.exports = {
       }
     } catch (error) {
       console.log(error);
-      return { success: false, message: error?.response?.data || error?.response || error };
+      return { success: false, message: error?.response?.data.message || error?.response?.data || error?.response || error };
     }
   },
   pennyDropStatus: async ({ ref = "" }) => {
@@ -335,6 +343,7 @@ module.exports = {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
           "x-client-secret": cashfreeClientSecret,
+          "X-Cf-Signature": signature,
         },
         params: data,
       });
@@ -346,7 +355,7 @@ module.exports = {
       }
     } catch (error) {
       console.log(error);
-      return { success: false, message: error?.response?.data || error?.response || error };
+      return { success: false, message: error?.response?.data.message || error?.response?.data || error?.response || error };
     }
   },
   pennyLess: async ({ accNo = "", ifsc = "", name = "" }) => {
@@ -364,6 +373,7 @@ module.exports = {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
           "x-client-secret": cashfreeClientSecret,
+          "X-Cf-Signature": signature,
         },
         data: data,
       });
@@ -375,7 +385,7 @@ module.exports = {
       }
     } catch (error) {
       console.log(error);
-      return { success: false, message: error?.response?.data || error?.response || error };
+      return { success: false, message: error?.response?.data.message || error?.response?.data || error?.response || error };
     }
   },
   bulkPennyDrop: async ({ bankDetails = [], ref = "" }) => {
@@ -398,6 +408,7 @@ module.exports = {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
           "x-client-secret": cashfreeClientSecret,
+          "X-Cf-Signature": signature,
         },
         data: data,
       });
@@ -409,7 +420,7 @@ module.exports = {
       }
     } catch (error) {
       console.log(error);
-      return { success: false, message: error?.response?.data || error?.response || error };
+      return { success: false, message: error?.response?.data.message || error?.response?.data || error?.response || error };
     }
   },
   bulkPennyDropStatus: async ({ ref = "" }) => {
@@ -425,6 +436,7 @@ module.exports = {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
           "x-client-secret": cashfreeClientSecret,
+          "X-Cf-Signature": signature,
         },
         params: data,
       });
@@ -436,7 +448,7 @@ module.exports = {
       }
     } catch (error) {
       console.log(error);
-      return { success: false, message: error?.response?.data || error?.response || error };
+      return { success: false, message: error?.response?.data.message || error?.response?.data || error?.response || error };
     }
   },
   documentOcr: async ({ ref = "", docType = "", filePath = "" }) => {
@@ -454,6 +466,8 @@ module.exports = {
           ...form.getHeaders(),
           "x-client-id": cashfreeClientId,
           "x-client-secret": cashfreeClientSecret,
+          "X-Cf-Signature": signature,
+          "x-api-version": "2024-12-01",
         },
       });
 
@@ -464,7 +478,7 @@ module.exports = {
       }
     } catch (error) {
       console.log(error);
-      return { success: false, message: error?.response?.data || error?.response || error };
+      return { success: false, message: error?.response?.data.message || error?.response?.data || error?.response || error };
     }
   },
   faceMatch: async ({ ref = "", firstImage = "", secondImage = "" }) => {
@@ -480,6 +494,7 @@ module.exports = {
           ...formData.getHeaders(),
           "x-client-id": cashfreeClientId,
           "x-client-secret": cashfreeClientSecret,
+          "X-Cf-Signature": signature,
         },
       });
 
@@ -490,7 +505,7 @@ module.exports = {
       }
     } catch (error) {
       console.log(error);
-      return { success: false, message: error?.response?.data || error?.response || error };
+      return { success: false, message: error?.response?.data.message || error?.response?.data || error?.response || error };
     }
   },
   UAN: async ({ uan = "", ref = "" }) => {
@@ -507,6 +522,7 @@ module.exports = {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
           "x-client-secret": cashfreeClientSecret,
+          "X-Cf-Signature": signature,
         },
         data: data,
       });
@@ -518,7 +534,7 @@ module.exports = {
       }
     } catch (error) {
       console.log(error);
-      return { success: false, message: error?.response?.data || error?.response || error };
+      return { success: false, message: error?.response?.data.message || error?.response?.data || error?.response || error };
     }
   },
 };

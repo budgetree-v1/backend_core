@@ -1,6 +1,6 @@
 const { panLitePrice, currentGst, noAccess, txnRef, verificationRef, panPremiumPrice, gstinPrice, aadhaarPrice, ocrVerifyPrice, uanPrice } = require("../../Configs");
 const db = require("../../Models");
-const { panLite, panPremium, aadhaarSendOtp, aadhaarVerifyOtp, documentOcr, UAN } = require("../cashfree");
+const { panLite, panPremium, aadhaarSendOtp, aadhaarVerifyOtp, documentOcr, UAN, gstinVerify } = require("../cashfree");
 
 module.exports = {
   panLiteHandler: async ({ uId = "", pan = "", name = "", dob = "", sendType = 1 }) => {
@@ -11,6 +11,8 @@ module.exports = {
       if (!pan) return { success: false, message: "Pan mandatory" };
       if (!name) return { success: false, message: "name mandatory" };
       if (!dob) return { success: false, message: "dob mandatory" };
+      const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+      if (!panRegex.test(pan.toUpperCase())) return { success: false, message: "Invalid pan format" };
 
       let charge = panLitePrice;
       let totalCharge = 0;
@@ -41,7 +43,7 @@ module.exports = {
         response: "",
         server: 1, //cashfree
         document: 1, //1 pan
-        docNumber: pan,
+        docNumber: pan.toUpperCase(),
         partnerReference: "",
       });
 
@@ -74,7 +76,7 @@ module.exports = {
               response: JSON.stringify(call.data),
               status: 1,
               message: "verified",
-              partnerReference: "",
+              partnerReference: call.data?.reference_id || "",
             }
           );
           return { success: true, data: call.data };
@@ -109,6 +111,8 @@ module.exports = {
 
       if (!pan) return { success: false, message: "Pan mandatory" };
       if (!name) return { success: false, message: "name mandatory" };
+      const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+      if (!panRegex.test(pan.toUpperCase())) return { success: false, message: "Invalid pan format" };
 
       let charge = panPremiumPrice;
       let totalCharge = 0;
@@ -139,7 +143,7 @@ module.exports = {
         response: "",
         server: 1, //cashfree
         document: 2, //1 pan 2 pan premium
-        docNumber: pan,
+        docNumber: pan.toUpperCase(),
         partnerReference: "",
       });
 
@@ -206,6 +210,9 @@ module.exports = {
       if (!ck) return { success: false, message: noAccess };
 
       if (!gstin) return { success: false, message: "gstin mandatory" };
+      const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+
+      if (!gstinRegex.test(gstin)) return { success: false, message: "Invalid gatin" };
 
       let charge = gstinPrice;
       let totalCharge = 0;
@@ -259,7 +266,7 @@ module.exports = {
       await db.Verification.updateOne({ _id: crt._id }, { server: server });
 
       if (server == 1) {
-        let call = await gstin({ gstin: gstin });
+        let call = await gstinVerify({ gstin: gstin });
         console.log(call);
 
         if (call.success) {
@@ -554,6 +561,9 @@ module.exports = {
       if (!ck) return { success: false, message: noAccess };
 
       if (!uan) return { success: false, message: "uan mandatory" };
+
+      const regex = /^\d{12}$/;
+      if (!regex.test(uan)) return { success: false, message: "Invalid uan" };
 
       let charge = uanPrice;
       let totalCharge = 0;

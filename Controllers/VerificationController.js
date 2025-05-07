@@ -14,11 +14,11 @@ module.exports = {
 
       let { pan } = req.body;
 
-      let response = await panLiteHandler({ pan: pan, uId: id, name: "xxx", dob: "xx" });
+      let response = await panLiteHandler({ pan: pan, uId: id, name: "xxx", dob: "1993-06-30" });
       if (response.success) {
         return res.send({ ...successResponse, message: response.message || "Document verified", result: response.data });
       } else {
-        return res.send({ ...failedResponse, message: response.message ? "Partner - " + response.message : "Document verification failed" });
+        return res.send({ ...failedResponse, message: response.message || "Document verification failed" });
       }
     } catch (error) {
       console.log(error);
@@ -38,7 +38,7 @@ module.exports = {
       if (response.success) {
         return res.send({ ...successResponse, message: response.message || "Document verified", result: response.data });
       } else {
-        return res.send({ ...failedResponse, message: response.message ? "Partner - " + response.message : "Document verification failed" });
+        return res.send({ ...failedResponse, message: response.message || "Document verification failed" });
       }
     } catch (error) {
       console.log(error);
@@ -59,7 +59,7 @@ module.exports = {
       if (response.success) {
         return res.send({ ...successResponse, message: response.message || "Document verified", result: response.data });
       } else {
-        return res.send({ ...failedResponse, message: response.message ? "Partner - " + response.message : "Document verification failed" });
+        return res.send({ ...failedResponse, message: response.message || "Document verification failed" });
       }
     } catch (error) {
       console.log(error);
@@ -80,7 +80,7 @@ module.exports = {
       if (response.success) {
         return res.send({ ...successResponse, message: response.message || "Document verified", result: response.data });
       } else {
-        return res.send({ ...failedResponse, message: response.message ? "Partner - " + response.message : "Document verification failed" });
+        return res.send({ ...failedResponse, message: response.message || "Document verification failed" });
       }
     } catch (error) {
       console.log(error);
@@ -101,7 +101,7 @@ module.exports = {
       if (response.success) {
         return res.send({ ...successResponse, message: response.message || "Document verified", result: response.data });
       } else {
-        return res.send({ ...failedResponse, message: response.message ? "Partner - " + response.message : "Document verification failed" });
+        return res.send({ ...failedResponse, message: response.message || "Document verification failed" });
       }
     } catch (error) {
       console.log(error);
@@ -127,7 +127,7 @@ module.exports = {
       if (response.success) {
         return res.send({ ...successResponse, message: response.message || "Document verified", result: response.data });
       } else {
-        return res.send({ ...failedResponse, message: response.message ? "Partner - " + response.message : "Document verification failed" });
+        return res.send({ ...failedResponse, message: response.message || "Document verification failed" });
       }
     } catch (error) {
       console.log(error);
@@ -152,7 +152,7 @@ module.exports = {
       if (response.success) {
         return res.send({ ...successResponse, message: response.message || "Document verified", result: response.data });
       } else {
-        return res.send({ ...failedResponse, message: response.message ? "Partner - " + response.message : "Document verification failed" });
+        return res.send({ ...failedResponse, message: response.message || "Document verification failed" });
       }
     } catch (error) {
       console.log(error);
@@ -173,7 +173,7 @@ module.exports = {
       if (response.success) {
         return res.send({ ...successResponse, message: response.message || "Document verified", result: response.data });
       } else {
-        return res.send({ ...failedResponse, message: response.message ? "Partner - " + response.message : "Document verification failed" });
+        return res.send({ ...failedResponse, message: response.message || "Document verification failed" });
       }
     } catch (error) {
       console.log(error);
