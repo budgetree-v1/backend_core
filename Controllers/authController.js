@@ -19,7 +19,7 @@ module.exports = {
       if (ck) return res.send({ ...failedResponse, message: "Phone already exist!" });
 
       let obj = {
-        phone: phone,
+        phone: phone
       };
 
       obj = await jwt.generate(obj);
@@ -28,7 +28,10 @@ module.exports = {
       //call otp service here rajat
 
       return res.send({ ...successResponse, message: "OTP sent", result: {}, token: obj });
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+      return res.send({ ...failedResponse });
+    }
   },
 
   login: async (req, res) => {
@@ -41,12 +44,13 @@ module.exports = {
       if (!ck) return res.send({ ...failedResponse, message: noAccess });
 
       let obj = {
-        phone: phone,
+        phone: phone
       };
       obj = await jwt.generate(obj);
       return res.send({ ...successResponse, message: "OTP sent", result: {}, token: obj });
     } catch (error) {
-      throw new Error(error);
+      console.log(error);
+      return res.send({ ...failedResponse });
     }
   },
   verifyOtp: async (req, res) => {
@@ -91,7 +95,7 @@ module.exports = {
           btNeftMin: 0.1,
           btRtgsMin: 0.1,
 
-          btPennyDrop: 0.1,
+          btPennyDrop: 0.1
         };
 
         ck = await db.User.create(qry);
@@ -103,12 +107,13 @@ module.exports = {
         id: ck._id,
         auth: true,
         user: 1,
-        session: ck.session + 1,
+        session: ck.session + 1
       };
       obj = await jwt.generate(obj);
       return res.send({ ...successResponse, message: "OTP verified", result: ck, token: obj });
     } catch (error) {
-      throw new Error(error);
+      console.log(error);
+      return res.send({ ...failedResponse });
     }
-  },
+  }
 };

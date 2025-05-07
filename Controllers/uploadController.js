@@ -4,7 +4,6 @@ const path = require("path");
 const fs = require("fs");
 const { failedResponse, successResponse, noAccess } = require("../Configs");
 const db = require("../Models");
-const { processPayout } = require("../Services/Handler/payout");
 
 // Multer setup
 const storage = multer.diskStorage({
@@ -17,11 +16,14 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+const uploadMulti = multer({ storage }).fields([
+  { name: "file1", maxCount: 1 },
+  { name: "file2", maxCount: 1 },
+]);
 
 module.exports = {
   upload,
-
-  // Upload Excel and save to MongoDB
+  uploadMulti,
   uploadExcel: async (req, res) => {
     try {
       const { id } = req.token;
@@ -33,13 +35,12 @@ module.exports = {
       const sheetName = workbook.SheetNames[0];
       const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-      // Optional: attach userId or validate fields
-      const formatted = data.map((row) => ({
+      const formatted = data.map(row => ({
         ...row,
-        user: id, // or whatever reference you want
+        user: id,
       }));
 
-      await db.Transaction.insertMany(formatted); // change this based on your actual model
+      await db.Transaction.insertMany(formatted);
 
       fs.unlinkSync(filePath);
 
@@ -56,7 +57,4 @@ module.exports = {
       });
     }
   },
-
-  // other methods (singlePayout, bulkPayout, etc.) remain unchanged
-  // ...
 };

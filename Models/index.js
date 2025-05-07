@@ -6,5 +6,6 @@ module.exports = {
   Admin: require("./Admin"),
   Server: require("./Server"),
   api: require("./api"),
-  Webhook: require("./Webhook")
+  Webhook: require("./Webhook"),
+  Verification: require("./Verification")
 };

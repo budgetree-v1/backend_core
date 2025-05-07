@@ -2,6 +2,7 @@ const axios = require("axios");
 const { cashfreeBase, cashfreeClientId, cashfreeClientSecret } = require("../Configs");
 const generateSignature = require("../utils/helper");
 const fs = require("fs");
+const FormData = require("form-data");
 
 module.exports = {
   deleteBeneficiary: async ({ beneficiary_id = "" }) => {
@@ -13,21 +14,21 @@ module.exports = {
           "Content-Type": "application/json",
           "x-api-version": "2024-01-01",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret
+          "x-client-secret": cashfreeClientSecret,
         },
-        data: data
+        data: data,
       });
 
       if (response.data) {
         return { success: true, data: response.data };
       } else {
-        return { success: false, messgae: response.data };
+        return { success: false, message: response.data };
       }
     } catch (error) {
       console.log(error);
       return {
         success: false,
-        message: error?.response?.data || error?.response || error
+        message: error?.response?.data || error?.response || error,
       };
     }
   },
@@ -42,25 +43,25 @@ module.exports = {
           "x-api-version": "2024-01-01",
           "x-client-id": cashfreeClientId,
           "x-client-secret": cashfreeClientSecret,
-          "X-Cf-Signature": signature
+          "X-Cf-Signature": signature,
         },
         params: {
           beneficiary_id,
           bank_ifsc,
-          bank_account_number
-        }
+          bank_account_number,
+        },
       });
 
       if (response.data) {
         return { success: true, data: response.data };
       } else {
-        return { success: false, messgae: response.data };
+        return { success: false, message: response.data };
       }
     } catch (error) {
       console.log(error);
       return {
         success: false,
-        message: error?.response?.data || error?.response || error
+        message: error?.response?.data || error?.response || error,
       };
     }
   },
@@ -73,7 +74,7 @@ module.exports = {
         beneficiary_instrument_details: {
           bank_account_number: bank_account_number,
           bank_ifsc: bank_ifsc,
-          vpa: vpa
+          vpa: vpa,
         },
         beneficiary_contact_details: {
           beneficiary_email: beneficiary_email,
@@ -82,8 +83,8 @@ module.exports = {
           beneficiary_address: beneficiary_address,
           beneficiary_city: beneficiary_city,
           beneficiary_state: beneficiary_state,
-          beneficiary_postal_code: beneficiary_postal_code
-        }
+          beneficiary_postal_code: beneficiary_postal_code,
+        },
       };
       const signature = generateSignature(cashfreeClientId, "../Keys/accountId_283823_public_key.pem");
       const response = await axios({
@@ -94,22 +95,22 @@ module.exports = {
           "x-api-version": "2024-01-01",
           "x-client-id": cashfreeClientId,
           "x-client-secret": cashfreeClientSecret,
-          "X-Cf-Signature": signature
+          "X-Cf-Signature": signature,
         },
-        data: data
+        data: data,
       });
 
       // console.log("data", response);
       if (response.data) {
         return { success: true, data: response.data };
       } else {
-        return { success: false, messgae: response.data };
+        return { success: false, message: response.data };
       }
     } catch (error) {
       console.log(error);
       return {
         success: false,
-        message: error?.response?.data || error?.response || error
+        message: error?.response?.data || error?.response || error,
       };
     }
   },
@@ -124,9 +125,9 @@ module.exports = {
           beneficiary_instrument_details: {
             bank_account_number: beneAcc,
             bank_ifsc: beneIfsc,
-            vpa: vpa
-          }
-        }
+            vpa: vpa,
+          },
+        },
       };
       const signature = generateSignature(cashfreeClientId, "./Keys/cashfree.pem");
 
@@ -138,21 +139,21 @@ module.exports = {
           "x-api-version": "2024-01-01",
           "x-client-id": cashfreeClientId,
           "x-client-secret": cashfreeClientSecret,
-          "X-Cf-Signature": signature
+          "X-Cf-Signature": signature,
         },
-        data: data
+        data: data,
       });
       console.log("repsone", response);
       if (response.data) {
         return { success: true, data: response.data };
       } else {
-        return { success: false, messgae: response.data.message || "failed with partner", data: response.data };
+        return { success: false, message: response.data.message || "failed with partner", data: response.data };
       }
     } catch (error) {
       console.log(error);
       return {
         success: false,
-        message: error?.response?.data?.message || error?.response?.data || error?.response || error
+        message: error?.response?.data?.message || error?.response?.data || error?.response || error,
       };
     }
   },
@@ -165,15 +166,15 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret
+          "x-client-secret": cashfreeClientSecret,
         },
-        data: data
+        data: data,
       });
 
       if (response.data.status == "SUCCESS") {
         return { success: true, data: response.data };
       } else {
-        return { success: false, data: response.data, messgae: response.data.message || "Failed to verify aadhaar" };
+        return { success: false, data: response.data, message: response.data.message || "Failed to verify aadhaar" };
       }
     } catch (error) {
       console.log(error);
@@ -184,7 +185,7 @@ module.exports = {
     try {
       let data = {
         otp: otp,
-        ref_id: ref
+        ref_id: ref,
       };
       const response = await axios({
         method: "post",
@@ -192,15 +193,15 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret
+          "x-client-secret": cashfreeClientSecret,
         },
-        data: data
+        data: data,
       });
 
       if (response.data.status == "VALID") {
         return { success: true, data: response.data };
       } else {
-        return { success: false, data: response.data, messgae: response.data.message || "Failed to verify aadhaar" };
+        return { success: false, data: response.data, message: response.data.message || "Failed to verify aadhaar" };
       }
     } catch (error) {
       console.log(error);
@@ -213,7 +214,7 @@ module.exports = {
         verification_id: ref,
         pan: pan,
         name: name,
-        dob: dob //"1993-06-30"
+        dob: dob, //"1993-06-30"
       };
       const response = await axios({
         method: "post",
@@ -221,15 +222,15 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret
+          "x-client-secret": cashfreeClientSecret,
         },
-        data: data
+        data: data,
       });
 
       if (response.data.status == "VALID") {
         return { success: true, data: response.data };
       } else {
-        return { success: false, data: response.data, messgae: response.data.message || "Failed to verify" };
+        return { success: false, data: response.data, message: response.data.message || "Failed to verify" };
       }
     } catch (error) {
       console.log(error);
@@ -241,7 +242,7 @@ module.exports = {
       let data = {
         pan: pan,
         verification_id: ref,
-        name: name
+        name: name,
       };
       const response = await axios({
         method: "post",
@@ -249,15 +250,15 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret
+          "x-client-secret": cashfreeClientSecret,
         },
-        data: data
+        data: data,
       });
 
       if (response.data.status == "VALID") {
         return { success: true, data: response.data };
       } else {
-        return { success: false, data: response.data, messgae: response.data.message || "Failed to verify" };
+        return { success: false, data: response.data, message: response.data.message || "Failed to verify" };
       }
     } catch (error) {
       console.log(error);
@@ -268,7 +269,7 @@ module.exports = {
     try {
       let data = {
         GSTIN: gstin,
-        business_name: ""
+        business_name: "",
       };
       const response = await axios({
         method: "post",
@@ -276,15 +277,15 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret
+          "x-client-secret": cashfreeClientSecret,
         },
-        data: data
+        data: data,
       });
 
       if (response.data.valid) {
         return { success: true, data: response.data };
       } else {
-        return { success: false, data: response.data, messgae: response.data.message || "Failed to verify" };
+        return { success: false, data: response.data, message: response.data.message || "Failed to verify" };
       }
     } catch (error) {
       console.log(error);
@@ -298,7 +299,7 @@ module.exports = {
         ifsc: ifsc,
         name: name,
         user_id: ref,
-        phone: ""
+        phone: "",
       };
       const response = await axios({
         method: "get",
@@ -306,9 +307,9 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret
+          "x-client-secret": cashfreeClientSecret,
         },
-        data: data
+        data: data,
       });
 
       if (response.data.account_status == "RECEIVED") {
@@ -325,7 +326,7 @@ module.exports = {
     try {
       let data = {
         // reference_id: "",
-        user_id: ref
+        user_id: ref,
       };
       const response = await axios({
         method: "get",
@@ -333,15 +334,15 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret
+          "x-client-secret": cashfreeClientSecret,
         },
-        params: data
+        params: data,
       });
 
       if (response.data.account_status == "VALID") {
         return { success: true, data: response.data };
       } else {
-        return { success: false, data: response.data, messgae: response.data.message || "Failed to verify" };
+        return { success: false, data: response.data, message: response.data.message || "Failed to verify" };
       }
     } catch (error) {
       console.log(error);
@@ -354,7 +355,7 @@ module.exports = {
         bank_account: accNo,
         ifsc: ifsc,
         name: name,
-        phone: ""
+        phone: "",
       };
       const response = await axios({
         method: "get",
@@ -362,15 +363,15 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret
+          "x-client-secret": cashfreeClientSecret,
         },
-        data: data
+        data: data,
       });
 
       if (response.data.account_status == "VALID") {
         return { success: true, data: response.data };
       } else {
-        return { success: false, data: response.data, messgae: response.data.message || "Failed to verify" };
+        return { success: false, data: response.data, message: response.data.message || "Failed to verify" };
       }
     } catch (error) {
       console.log(error);
@@ -381,7 +382,7 @@ module.exports = {
     try {
       let data = {
         bulk_verification_id: ref,
-        entries: bankDetails
+        entries: bankDetails,
       };
 
       // {
@@ -396,15 +397,15 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret
+          "x-client-secret": cashfreeClientSecret,
         },
-        data: data
+        data: data,
       });
 
       if (response.data.status == "RECEIVED") {
         return { success: true, data: response.data };
       } else {
-        return { success: false, data: response.data, messgae: response.data.message || "Failed to verify" };
+        return { success: false, data: response.data, message: response.data.message || "Failed to verify" };
       }
     } catch (error) {
       console.log(error);
@@ -414,7 +415,7 @@ module.exports = {
   bulkPennyDropStatus: async ({ ref = "" }) => {
     try {
       let data = {
-        bulk_verification_id: ref
+        bulk_verification_id: ref,
       };
 
       const response = await axios({
@@ -423,15 +424,15 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret
+          "x-client-secret": cashfreeClientSecret,
         },
-        params: data
+        params: data,
       });
 
       if (response.data?.entries?.lenght() > 0) {
         return { success: true, data: response.data };
       } else {
-        return { success: false, data: response.data, messgae: response.data.message || "Failed to verify" };
+        return { success: false, data: response.data, message: response.data.message || "Failed to verify" };
       }
     } catch (error) {
       console.log(error);
@@ -440,28 +441,26 @@ module.exports = {
   },
   documentOcr: async ({ ref = "", docType = "", filePath = "" }) => {
     try {
-      const formData = new FormData();
+      const form = new FormData();
 
-      formData.append("verification_id", ref);
-      formData.append("document_type", docType);
+      form.append("verification_id", ref);
+      form.append("document_type", docType);
 
-      const fileStream = fs.createReadStream(filePath);
-      formData.append("file", fileStream);
+      form.append("file", fs.createReadStream(filePath));
 
-      formData.append("do_verification", docType == "PAN" ? true : false);
-
-      const response = await axios.post(`${cashfreeBase}/verification/bharat-ocr`, formData, {
+      form.append("do_verification", docType == "PAN" ? "true" : "false");
+      const response = await axios.post(`${cashfreeBase}/verification/bharat-ocr`, form, {
         headers: {
-          ...formData.getHeaders(),
+          ...form.getHeaders(),
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret
-        }
+          "x-client-secret": cashfreeClientSecret,
+        },
       });
 
       if (response.data?.status == "VALID") {
         return { success: true, data: response.data };
       } else {
-        return { success: false, data: response.data, messgae: response.data.message || "Failed to verify" };
+        return { success: false, data: response.data, message: response.data.message || "Failed to verify" };
       }
     } catch (error) {
       console.log(error);
@@ -471,6 +470,7 @@ module.exports = {
   faceMatch: async ({ ref = "", firstImage = "", secondImage = "" }) => {
     try {
       const formData = new FormData();
+
       formData.append("verification_id", ref);
       formData.append("first_image", fs.createReadStream(firstImage));
       formData.append("second_image", fs.createReadStream(secondImage));
@@ -479,14 +479,14 @@ module.exports = {
         headers: {
           ...formData.getHeaders(),
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret
-        }
+          "x-client-secret": cashfreeClientSecret,
+        },
       });
 
       if (response.data?.status == "SUCCESS") {
         return { success: true, data: response.data };
       } else {
-        return { success: false, data: response.data, messgae: response.data.message || "Failed to verify" };
+        return { success: false, data: response.data, message: response.data.message || "Failed to verify" };
       }
     } catch (error) {
       console.log(error);
@@ -497,7 +497,7 @@ module.exports = {
     try {
       let data = {
         verification_id: ref,
-        uan: uan
+        uan: uan,
       };
 
       const response = await axios({
@@ -506,19 +506,19 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret
+          "x-client-secret": cashfreeClientSecret,
         },
-        data: data
+        data: data,
       });
 
       if (response.data?.status == "SUCCESS") {
         return { success: true, data: response.data };
       } else {
-        return { success: false, data: response.data, messgae: response.data.message || "Failed to verify" };
+        return { success: false, data: response.data, message: response.data.message || "Failed to verify" };
       }
     } catch (error) {
       console.log(error);
       return { success: false, message: error?.response?.data || error?.response || error };
     }
-  }
+  },
 };

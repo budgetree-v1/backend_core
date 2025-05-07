@@ -6,7 +6,7 @@ const Transaction = new Schema(
   {
     User: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: "User"
     },
     cusRef: String,
     txnType: Number, //1 credit 2 debit 3pennydrop
@@ -36,11 +36,11 @@ const Transaction = new Schema(
 
     partnerStatus: String,
     partnerMessage: String,
-
-    tId: Number,
+    server: Number, //1cashfree 2 easebuzz
+    tId: Number
   },
   {
-    timestamps: true,
+    timestamps: true
   }
 );
 

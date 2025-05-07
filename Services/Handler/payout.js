@@ -63,7 +63,8 @@ module.exports = {
         sendType: 1, //1 app 2 api
 
         partnerStatus: "",
-        partnerMessage: ""
+        partnerMessage: "",
+        server: 0
       };
 
       let crt = await db.Transaction.create(qry);
@@ -122,6 +123,8 @@ module.exports = {
         let server = 2;
         let sr = await db.Server.findOne({});
         if (sr) server = sr.payoutServer;
+
+        await db.Transaction.updateOne({ _id: crt._id }, { server: server });
 
         let qry = {
           status: 3,

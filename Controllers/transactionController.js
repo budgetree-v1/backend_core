@@ -176,14 +176,8 @@ module.exports = {
     try {
       let { id } = req.token;
 
-      let user = await db.User.findOne({
-        _id: id
-      });
-      if (!user)
-        return res.send({
-          ...failedResponse,
-          message: noAccess
-        });
+      let user = await db.User.findOne({ _id: id });
+      if (!user) return res.send({ ...failedResponse, message: noAccess });
 
       let { page, limit } = req.query;
 
