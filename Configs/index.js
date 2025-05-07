@@ -24,4 +24,8 @@ module.exports = {
 
   cashfreeClientId: process.env.CASHFREE_CLIENT_ID,
   cashfreeClientSecret: process.env.CASHFREE_CLIENT_SECRET,
+
+  easebuzzBase: "https://wire.easebuzz.in",
+  easebuzzWireKey: "",
+  easebuzzWireSecret: "",
 };

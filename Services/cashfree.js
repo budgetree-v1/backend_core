@@ -4,7 +4,6 @@ const generateSignature = require("../utils/helper");
 const fs = require("fs");
 
 module.exports = {
-  //DELETE BENEFICIARY
   deleteBeneficiary: async ({ beneficiary_id = "" }) => {
     try {
       const response = await axios({
@@ -32,7 +31,6 @@ module.exports = {
       };
     }
   },
-  //GET BENEFICIARY
   getBeneficiary: async (beneficiary_id = "", bank_account_number = "", bank_ifsc = "") => {
     try {
       const signature = generateSignature(cashfreeClientId, "../Keys/accountId_283823_public_key.pem");
@@ -66,8 +64,6 @@ module.exports = {
       };
     }
   },
-
-  //CREATE BENEFICIARY
   createBeneficiary: async ({ uid = "", beneficiary_name = "", bank_account_number = " ", bank_ifsc = "", vpa = "", beneficiary_email = "", beneficiary_phone = "", beneficiary_country_code = "", beneficiary_address = "", beneficiary_city = "", beneficiary_state = "", beneficiary_postal_code = "" }) => {
     try {
       const beneficiary_id = `CASH_${Date.now()}_${Math.floor(Math.random() * 10000)}`;

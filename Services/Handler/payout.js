@@ -1,6 +1,7 @@
 const { noAccess, txnRef, currentGst } = require("../../Configs");
 const db = require("../../Models");
 const { singlePayout } = require("../cashfree");
+const { singlePayoutEasebuzz } = require("../easebuzz");
 
 module.exports = {
   processPayout: async ({ uId = "", mode = "", amount = 0, beneAcc = "", beneIfsc = "", vpa = "", note = "", sendType = 1 }) => {
@@ -159,6 +160,36 @@ module.exports = {
               qry.partnerStatus = pay.data?.status || "";
               qry.partnerMessage = pay.data?.status_description || "";
               qry.ref = pay.data?.cf_transfer_id || "";
+            }
+          }
+        }
+        if (server == 2) {
+          let pay = await singlePayoutEasebuzz({
+            mode: mode,
+            amount: amount,
+            txnId: ref,
+            beneAcc: beneAcc,
+            beneIfsc: beneIfsc,
+            vpa: vpa,
+          });
+          if (!pay.success) {
+            qry.message = "Payment faield!";
+            qry.status = 3;
+          } else {
+            if (pay.data.status == "accepted") {
+              qry.message = "Payment process pending!";
+              qry.status = 2;
+              qry.partnerStatus = pay.data?.status || "";
+              qry.partnerMessage = pay.data?.narration || "";
+              qry.ref = pay.data?.id || "";
+            } else {
+              qry.message = "Payment faield!";
+              qry.status = 3;
+              qry.partnerStatus = pay.data?.status || "";
+              qry.partnerMessage = pay.data?.narration || "";
+
+              await db.Admin.updateOne({ income: 1 }, { $inc: { balance: -parseFloat(totalCharge.toFixed(2)) } });
+              await db.User.updateOne({ _id: uId }, { $inc: { balance: parseFloat(totalAmount.toFixed(2)) } }, { new: true }).lean();
             }
           }
         }
