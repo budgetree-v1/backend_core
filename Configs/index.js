@@ -5,13 +5,13 @@ module.exports = {
     status: true,
     statusCode: 200,
     message: "Success",
-    result: {},
+    result: {}
   },
   failedResponse: {
     status: false,
     statusCode: 400,
     message: "Failed",
-    result: {},
+    result: {}
   },
 
   noAccess: "You dont have access!",
@@ -27,5 +27,5 @@ module.exports = {
 
   easebuzzBase: "https://wire.easebuzz.in",
   easebuzzWireKey: "",
-  easebuzzWireSecret: "",
+  easebuzzWireSecret: ""
 };

@@ -7,7 +7,7 @@ module.exports = {
     try {
       let ck = await db.User.findOne({ _id: uId });
       if (!ck) return { success: false, message: noAccess };
-
+      let amount = 1;
       let qry = {
         User: uId,
         cusRef: "",
@@ -16,7 +16,7 @@ module.exports = {
         utr: "",
         ref: "",
         txnId: "",
-        message: note || "Pennydrop initiated!",
+        message: "Pennydrop initiated!",
         amount: amount,
         charge: 0,
         gst: 0,
@@ -32,11 +32,11 @@ module.exports = {
         beneBank: "",
         benePhone: "",
         beneEmail: "",
-        beneVpa: vpa || "",
+        beneVpa: "",
         sendType: 1, //1 app 2 api
 
         partnerStatus: "",
-        partnerMessage: "",
+        partnerMessage: ""
       };
 
       let crt = await db.Transaction.create(qry);
@@ -59,13 +59,10 @@ module.exports = {
       totalCharge = charge + gst;
       let totalAmount = parseFloat(parseFloat(amount).toFixed(2)) + parseFloat(totalCharge.toFixed(2));
 
-      let ckb = await db.User.countDocuments({
-        balance: { $gte: totalAmount },
-        _id: uId,
-      });
+      let ckb = await db.User.countDocuments({ balance: { $gte: totalAmount }, _id: uId });
 
       console.log("ckb", ckb);
-      if (ckb !== 0) {
+      if (ckb == 0) {
         await db.Transaction.updateOne({ _id: crt._id }, { $set: { message: "Insufficient balance!" } });
         return { success: false, message: "Insufficiant balance!" };
       } else {
@@ -80,7 +77,7 @@ module.exports = {
         let qry = {
           status: 3,
           message: "Payment initiated!",
-          ref: "",
+          ref: ""
         };
 
         if (server == 1) {
@@ -89,11 +86,12 @@ module.exports = {
             ref: ref,
             beneAcc: beneAcc,
             beneIfsc: beneIfsc,
-            name: "penny",
+            name: "penny"
           });
+          console.log("here", pay);
 
           if (!pay.success) {
-            qry.message = "Payment faield!";
+            qry.message = pay.message ? "partner - " + pay.message : "Payment faield!";
             qry.status = 3;
             qry.partnerStatus = pay.data?.type || "";
             qry.partnerMessage = pay.data?.message || "";
@@ -120,15 +118,15 @@ module.exports = {
         charge: ckt.charge,
         gst: ckt.gst,
         totalCharge: ckt.totalCharge,
-        txnId: ckt.txnId,
+        txnId: ckt.txnId
       };
       return { success: true, data: out };
     } catch (error) {
       console.log("error", error);
       return {
         success: false,
-        message: error.message || "Failed to process the payment!",
+        message: error.message || "Failed to process the payment!"
       };
     }
-  },
+  }
 };

@@ -314,7 +314,7 @@ module.exports = {
       if (response.data.account_status == "RECEIVED") {
         return { success: true, data: response.data };
       } else {
-        return { success: false, data: response.data, messgae: response.data.message || "Failed to verify" };
+        return { success: false, data: response.data, message: response.data.message || "Failed to verify" };
       }
     } catch (error) {
       console.log(error);

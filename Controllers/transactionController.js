@@ -4,6 +4,7 @@ const { processPayout } = require("../Services/Handler/payout");
 const { createBeneficiary, getBeneficiary } = require("../Services/cashfree");
 const { readFile } = require("fs/promises");
 const { parse } = require("csv-parse/sync");
+const { pennyDropHandler } = require("../Services/Handler/pennyDrop");
 
 module.exports = {
   singlePayout: async (req, res) => {
@@ -59,53 +60,42 @@ module.exports = {
 
   bulkPayout: async (req, res) => {
     try {
-      let { id } = req.token;
-      let ck = await db.User.findOne({
-        _id: id
-      });
-      if (!ck)
-        res.send({
-          ...failedResponse,
-          message: noAccess
-        });
+      const { id } = req.token;
 
-      const uploadedFile = req.file;
-
-      if (!uploadedFile) {
-        return res.status(400).json({
-          message: "No file uploaded."
-        });
+      const user = await db.User.findById(id);
+      if (!user) {
+        return res.send({ ...failedResponse, message: noAccess });
       }
 
-      // Read file content from disk
-      const fileContent = await readFile(uploadedFile.path, "utf-8");
+      const file = req.file;
+      if (!file) {
+        return res.send({ ...failedResponse, message: "No file uploaded." });
+      }
 
-      // Parse CSV content
+      const fileContent = await fs.readFile(file.path, "utf-8");
       const records = parse(fileContent, {
         columns: true,
         skip_empty_lines: true
       });
-      const savedData = await db.TransactionInitiate.insertMany(records);
 
-      //SEND MONEY USING SINGLE PAY
-      const payoutPromises = savedData.map(item => {
-        const payoutData = {
-          uId: id,
-          mode: item.TRANSFER_MODE,
-          amount: item.AMOUNT,
-          beneAcc: item.PAYEE_ACCOUNT_NUMBER,
-          beneIfsc: item.PAYEE_IFSC,
-          vpa: item.VPA || "",
-          note: item.REMARKS
-        };
+      const savedRecords = await db.TransactionInitiate.insertMany(records);
 
-        return processPayout(payoutData)
-          .then(async response => {
-            console.log("succ", response);
+      const results = await Promise.all(
+        savedRecords.map(async item => {
+          const payoutData = {
+            uId: item._id,
+            mode: item.TRANSFER_MODE,
+            amount: item.AMOUNT,
+            beneAcc: item.PAYEE_ACCOUNT_NUMBER,
+            beneIfsc: item.PAYEE_IFSC,
+            vpa: item.VPA || "",
+            note: item.REMARKS
+          };
+
+          try {
+            const response = await processPayout(payoutData);
             await db.TransactionInitiate.updateOne(
-              {
-                _id: item._id
-              },
+              { _id: item._id },
               {
                 $set: {
                   status: true,
@@ -113,18 +103,10 @@ module.exports = {
                 }
               }
             );
-            return {
-              id: item._id,
-              status: "success",
-              response: response.data
-            };
-          })
-          .catch(async err => {
-            console.log("err", err);
+            return { id: item._id, status: "success", response: response.data };
+          } catch (err) {
             await db.TransactionInitiate.updateOne(
-              {
-                _id: item._id
-              },
+              { _id: item._id },
               {
                 $set: {
                   status: false,
@@ -132,95 +114,35 @@ module.exports = {
                 }
               }
             );
-            return {
-              id: item._id,
-              status: "failed",
-              response: err.message
-            };
-          });
-      });
-
-      const results = await Promise.all(payoutPromises);
+            return { id: item._id, status: "failed", response: err.message };
+          }
+        })
+      );
 
       return res.status(200).json({
-        message: "CSV parsed",
+        message: "CSV processed",
         data: results
       });
-
-      // let { id } = req.token;
-      // let ck = await db.User.findOne({ _id: id });
-      // if (!ck) res.send({ ...failedResponse, message: noAccess });
-
-      // let { amount, mode, note, beneAcc, beneIfsc, vpa } = req.body;
-
-      // let data = {
-      //   uId: id,
-      //   mode: mode,
-      //   amount: amount,
-      //   beneAcc: beneAcc,
-      //   beneIfsc: beneIfsc,
-      //   vpa: vpa,
-      //   note: note,
-      // };
-
-      // let callServe = await processPayout(data);
-      // if (callServe.success) {
-      //   res.send({
-      //     ...successResponse,
-      //     message: "Payment processing!",
-      //     result: callServe.data,
-      //   });
-      // } else {
-      //   res.send({
-      //     ...failedResponse,
-      //     message: "Payment initiation failed",
-      //     result: callServe.data,
-      //   });
-      // }
     } catch (error) {
-      console.log(error);
-      res.send({
+      console.error(error);
+      return res.send({
         ...failedResponse,
         message: error.message || "Failed to access this!"
       });
     }
   },
 
-  // addBenificiary: async (req, res) => {
-  //   try {
-  //     let { id } = req.token;
+  addBenificiary: async (req, res) => {
+    try {
+      let { id } = req.token;
 
-  //     const { beneficiary_name } = req.body;
-  //     if (!beneficiary_name) {
-  //       throw new Error("Beneficiary name are required.");
-  //     }
-  //     const data = req.body;
-
-  //     let callServe = await createBeneficiary({ uid: id, ...data });
-  //     console.log("callserver", callServe);
-
-  //     if (callServe.success) {
-  //       await db.Beneficiary.create({ User: id, ...callServe.data });
-  //       res.send({
-  //         ...successResponse,
-  //         message: "Beneficiary Added Successfully!",
-  //         result: callServe.data,
-  //       });
-  //     } else {
-  //       res.send({
-  //         ...failedResponse,
-  //         message: "Benificiary process failed",
-  //         result: callServe.data,
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //     res.send({
-  //       ...failedResponse,
-  //       message: error.message || "Failed to access this!",
-  //     });
-  //   }
-  // },
+      let callServe = await pennyDropHandler({ uId: id, beneAcc: "67326232762882", beneIfsc: "IDIB000K202" });
+      return res.send({ ...successResponse, message: callServe });
+    } catch (error) {
+      console.log(error);
+      return res.send({ ...failedResponse, message: error.message || "Failed to access this!" });
+    }
+  },
   // getBenificiary: async (req, res) => {
   //   try {
   //     let { id } = req.token;
