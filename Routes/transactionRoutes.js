@@ -12,4 +12,7 @@ Router.get("/getBenificiaryList", jwt.verify, transactionController.getBenificia
 
 Router.get("/listTransaction", jwt.verify, transactionController.listTransaction);
 
+//webhooks
+Router.post("/webhook/easbuzz/payout", transactionController.easebuzzPayout);
+
 module.exports = Router;

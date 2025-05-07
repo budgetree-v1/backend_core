@@ -119,7 +119,7 @@ module.exports = {
         await db.Admin.updateOne({ income: 1 }, { $inc: { balance: parseFloat(totalCharge.toFixed(2)) } });
         await db.User.updateOne({ _id: uId }, { $inc: { balance: -parseFloat(totalAmount.toFixed(2)) } }, { new: true }).lean();
 
-        let server = 1;
+        let server = 2;
         let sr = await db.Server.findOne({});
         if (sr) server = sr.payoutServer;
 

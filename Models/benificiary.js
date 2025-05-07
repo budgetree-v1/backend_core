@@ -5,7 +5,7 @@ const Beneficiary = new Schema(
   {
     User: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: "User"
     },
     beneficiary_id: String,
     beneficiary_name: String,
@@ -14,10 +14,10 @@ const Beneficiary = new Schema(
     vpa: { type: String, trim: true },
     beneficiary_phone: { type: String, trim: true },
     beneficiary_email: { type: String, trim: true, lowercase: true },
-    status: Number, //1 success 2 pending 3 failed
+    status: Number //1 success 2 pending 3 failed
   },
   {
-    timestamps: true, // Adds createdAt & updatedAt
+    timestamps: true // Adds createdAt & updatedAt
   }
 );
 

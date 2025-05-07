@@ -229,38 +229,35 @@ module.exports = {
       let user = await db.User.findOne({
         _id: id
       });
-      if (!user)
-        return res.send({
-          ...failedResponse,
-          message: noAccess
-        });
+      if (!user) return res.send({ ...failedResponse, message: noAccess });
 
-      let transactions = await db.Transaction.find({
-        User: id
-      })
-        .sort({
-          createdAt: -1
-        })
-        .skip(skip)
-        .limit(limit);
+      let transactions = await db.Transaction.find({ User: id }).sort({ createdAt: -1 }).skip(skip).limit(limit);
 
       const total = await db.Transaction.countDocuments({
         User: id
       });
 
-      return res.send({
-        ...successResponse,
-        message: "Transaction list fetched!",
-        result: transactions,
-        totalPages: Math.ceil(total / limit),
-        totalItems: total
-      });
+      return res.send({ ...successResponse, message: "Transaction list fetched!", result: transactions, totalPages: Math.ceil(total / limit), totalItems: total });
     } catch (error) {
       console.log(error);
       return res.send({
         ...failedResponse,
         message: error.message || "Failed to access this!"
       });
+    }
+  },
+  easebuzzPayout: async (req, res) => {
+    try {
+      let crt = await db.Webhook.create({
+        api: "easebuzz/payout",
+        data: JSON.stringify(req.body),
+        txnId: "",
+        heeader: ""
+      });
+      return res.send({ ...successResponse, message: "Success", result: {} });
+    } catch (error) {
+      console.log(error);
+      return res.send({ ...failedResponse, message: error.message || "Failed to access this!" });
     }
   }
 };
