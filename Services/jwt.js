@@ -18,7 +18,6 @@ module.exports = {
   generate: async (obj) => {
     try {
       const token = await jwt.sign(obj, Secrete, { expiresIn: "56h" });
-
       return token;
     } catch (error) {
       console.log(error);
@@ -28,11 +27,7 @@ module.exports = {
   verify: async (req, res, next) => {
     try {
       if (!req.headers || !req.headers.authorization) {
-        return res.json({
-          ...failedResponse,
-          statusCode: 401,
-          message: noAccess,
-        });
+        return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
       }
       let verify = null;
       if (req.token) {
@@ -40,61 +35,58 @@ module.exports = {
       } else {
         var token = req.headers.authorization;
         var n = token.search("Bearer ");
-        if (n < 0)
-          return res.json({
-            ...failedResponse,
-            statusCode: 401,
-            message: noAccess,
-          });
+        if (n < 0) return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
         token = token.replace("Bearer ", "");
         verify = jwt.verify(token, Secrete);
-        console.log("verify", verify);
 
         if (!verify || !verify.id) {
-          return res.json({
-            ...failedResponse,
-            statusCode: 401,
-            message: noAccess,
-          });
+          return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
         }
         if (!verify.user) {
-          return res.json({
-            ...failedResponse,
-            statusCode: 401,
-            message: noAccess,
-          });
+          return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
         }
 
         if (verify.user == 1) {
           if (!verify.session) {
-            return res.json({
-              ...failedResponse,
-              statusCode: 401,
-              message: noAccess,
-            });
+            return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
           } else {
             let ck = await db.User.countDocuments({
               _id: verify.id,
               session: verify.session,
             });
-            if (ck == 0)
-              return res.json({
-                ...failedResponse,
-                statusCode: 401,
-                message: noAccess,
-              });
+            if (ck == 0) return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
           }
         }
+      }
+      console.log("verify", verify);
+      req.token = verify;
+      next();
+    } catch (error) {
+      console.log(error);
+      return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+    }
+  },
+  verifyOtp: async (req, res, next) => {
+    try {
+      if (!req.headers || !req.headers.authorization) {
+        return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+      }
+      let verify = null;
+      if (req.token) {
+        verify = req.token;
+      } else {
+        var token = req.headers.authorization;
+        var n = token.search("Bearer ");
+        if (n < 0) return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+        token = token.replace("Bearer ", "");
+        verify = jwt.verify(token, Secrete);
+        console.log("verify", verify);
       }
       req.token = verify;
       next();
     } catch (error) {
       console.log(error);
-      return res.json({
-        ...failedResponse,
-        statusCode: 401,
-        message: noAccess,
-      });
+      return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
     }
   },
 };

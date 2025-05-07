@@ -8,6 +8,7 @@ const User = new Schema(
     phone: String,
     email: String,
     balance: Number,
+    isOtpSent: Number, //1 yes 2 no
     session: Number,
 
     btUpiMin: Number,

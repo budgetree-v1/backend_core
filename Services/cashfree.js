@@ -13,9 +13,9 @@ module.exports = {
           "Content-Type": "application/json",
           "x-api-version": "2024-01-01",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret,
+          "x-client-secret": cashfreeClientSecret
         },
-        data: data,
+        data: data
       });
 
       if (response.data) {
@@ -27,7 +27,7 @@ module.exports = {
       console.log(error);
       return {
         success: false,
-        message: error?.response?.data || error?.response || error,
+        message: error?.response?.data || error?.response || error
       };
     }
   },
@@ -42,13 +42,13 @@ module.exports = {
           "x-api-version": "2024-01-01",
           "x-client-id": cashfreeClientId,
           "x-client-secret": cashfreeClientSecret,
-          "X-Cf-Signature": signature,
+          "X-Cf-Signature": signature
         },
         params: {
           beneficiary_id,
           bank_ifsc,
-          bank_account_number,
-        },
+          bank_account_number
+        }
       });
 
       if (response.data) {
@@ -60,7 +60,7 @@ module.exports = {
       console.log(error);
       return {
         success: false,
-        message: error?.response?.data || error?.response || error,
+        message: error?.response?.data || error?.response || error
       };
     }
   },
@@ -73,7 +73,7 @@ module.exports = {
         beneficiary_instrument_details: {
           bank_account_number: bank_account_number,
           bank_ifsc: bank_ifsc,
-          vpa: vpa,
+          vpa: vpa
         },
         beneficiary_contact_details: {
           beneficiary_email: beneficiary_email,
@@ -82,8 +82,8 @@ module.exports = {
           beneficiary_address: beneficiary_address,
           beneficiary_city: beneficiary_city,
           beneficiary_state: beneficiary_state,
-          beneficiary_postal_code: beneficiary_postal_code,
-        },
+          beneficiary_postal_code: beneficiary_postal_code
+        }
       };
       const signature = generateSignature(cashfreeClientId, "../Keys/accountId_283823_public_key.pem");
       const response = await axios({
@@ -94,9 +94,9 @@ module.exports = {
           "x-api-version": "2024-01-01",
           "x-client-id": cashfreeClientId,
           "x-client-secret": cashfreeClientSecret,
-          "X-Cf-Signature": signature,
+          "X-Cf-Signature": signature
         },
-        data: data,
+        data: data
       });
 
       // console.log("data", response);
@@ -109,7 +109,7 @@ module.exports = {
       console.log(error);
       return {
         success: false,
-        message: error?.response?.data || error?.response || error,
+        message: error?.response?.data || error?.response || error
       };
     }
   },
@@ -124,11 +124,11 @@ module.exports = {
           beneficiary_instrument_details: {
             bank_account_number: beneAcc,
             bank_ifsc: beneIfsc,
-            vpa: vpa,
-          },
-        },
+            vpa: vpa
+          }
+        }
       };
-      const signature = generateSignature(cashfreeClientId, "../Keys/accountId_283823_public_key.pem");
+      const signature = generateSignature(cashfreeClientId, "./Keys/cashfree.pem");
 
       const response = await axios({
         method: "post",
@@ -138,21 +138,21 @@ module.exports = {
           "x-api-version": "2024-01-01",
           "x-client-id": cashfreeClientId,
           "x-client-secret": cashfreeClientSecret,
-          "X-Cf-Signature": signature,
+          "X-Cf-Signature": signature
         },
-        data: data,
+        data: data
       });
       console.log("repsone", response);
       if (response.data) {
         return { success: true, data: response.data };
       } else {
-        return { success: false, messgae: response.data };
+        return { success: false, messgae: response.data.message || "failed with partner", data: response.data };
       }
     } catch (error) {
       console.log(error);
       return {
         success: false,
-        message: error?.response?.data || error?.response || error,
+        message: error?.response?.data?.message || error?.response?.data || error?.response || error
       };
     }
   },
@@ -165,9 +165,9 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret,
+          "x-client-secret": cashfreeClientSecret
         },
-        data: data,
+        data: data
       });
 
       if (response.data.status == "SUCCESS") {
@@ -184,7 +184,7 @@ module.exports = {
     try {
       let data = {
         otp: otp,
-        ref_id: ref,
+        ref_id: ref
       };
       const response = await axios({
         method: "post",
@@ -192,9 +192,9 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret,
+          "x-client-secret": cashfreeClientSecret
         },
-        data: data,
+        data: data
       });
 
       if (response.data.status == "VALID") {
@@ -213,7 +213,7 @@ module.exports = {
         verification_id: ref,
         pan: pan,
         name: name,
-        dob: dob, //"1993-06-30"
+        dob: dob //"1993-06-30"
       };
       const response = await axios({
         method: "post",
@@ -221,9 +221,9 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret,
+          "x-client-secret": cashfreeClientSecret
         },
-        data: data,
+        data: data
       });
 
       if (response.data.status == "VALID") {
@@ -241,7 +241,7 @@ module.exports = {
       let data = {
         pan: pan,
         verification_id: ref,
-        name: name,
+        name: name
       };
       const response = await axios({
         method: "post",
@@ -249,9 +249,9 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret,
+          "x-client-secret": cashfreeClientSecret
         },
-        data: data,
+        data: data
       });
 
       if (response.data.status == "VALID") {
@@ -268,7 +268,7 @@ module.exports = {
     try {
       let data = {
         GSTIN: gstin,
-        business_name: "",
+        business_name: ""
       };
       const response = await axios({
         method: "post",
@@ -276,9 +276,9 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret,
+          "x-client-secret": cashfreeClientSecret
         },
-        data: data,
+        data: data
       });
 
       if (response.data.valid) {
@@ -298,7 +298,7 @@ module.exports = {
         ifsc: ifsc,
         name: name,
         user_id: ref,
-        phone: "",
+        phone: ""
       };
       const response = await axios({
         method: "get",
@@ -306,9 +306,9 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret,
+          "x-client-secret": cashfreeClientSecret
         },
-        data: data,
+        data: data
       });
 
       if (response.data.account_status == "RECEIVED") {
@@ -325,7 +325,7 @@ module.exports = {
     try {
       let data = {
         // reference_id: "",
-        user_id: ref,
+        user_id: ref
       };
       const response = await axios({
         method: "get",
@@ -333,9 +333,9 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret,
+          "x-client-secret": cashfreeClientSecret
         },
-        params: data,
+        params: data
       });
 
       if (response.data.account_status == "VALID") {
@@ -354,7 +354,7 @@ module.exports = {
         bank_account: accNo,
         ifsc: ifsc,
         name: name,
-        phone: "",
+        phone: ""
       };
       const response = await axios({
         method: "get",
@@ -362,9 +362,9 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret,
+          "x-client-secret": cashfreeClientSecret
         },
-        data: data,
+        data: data
       });
 
       if (response.data.account_status == "VALID") {
@@ -381,7 +381,7 @@ module.exports = {
     try {
       let data = {
         bulk_verification_id: ref,
-        entries: bankDetails,
+        entries: bankDetails
       };
 
       // {
@@ -396,9 +396,9 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret,
+          "x-client-secret": cashfreeClientSecret
         },
-        data: data,
+        data: data
       });
 
       if (response.data.status == "RECEIVED") {
@@ -414,7 +414,7 @@ module.exports = {
   bulkPennyDropStatus: async ({ ref = "" }) => {
     try {
       let data = {
-        bulk_verification_id: ref,
+        bulk_verification_id: ref
       };
 
       const response = await axios({
@@ -423,9 +423,9 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret,
+          "x-client-secret": cashfreeClientSecret
         },
-        params: data,
+        params: data
       });
 
       if (response.data?.entries?.lenght() > 0) {
@@ -454,8 +454,8 @@ module.exports = {
         headers: {
           ...formData.getHeaders(),
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret,
-        },
+          "x-client-secret": cashfreeClientSecret
+        }
       });
 
       if (response.data?.status == "VALID") {
@@ -479,8 +479,8 @@ module.exports = {
         headers: {
           ...formData.getHeaders(),
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret,
-        },
+          "x-client-secret": cashfreeClientSecret
+        }
       });
 
       if (response.data?.status == "SUCCESS") {
@@ -497,7 +497,7 @@ module.exports = {
     try {
       let data = {
         verification_id: ref,
-        uan: uan,
+        uan: uan
       };
 
       const response = await axios({
@@ -506,9 +506,9 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           "x-client-id": cashfreeClientId,
-          "x-client-secret": cashfreeClientSecret,
+          "x-client-secret": cashfreeClientSecret
         },
-        data: data,
+        data: data
       });
 
       if (response.data?.status == "SUCCESS") {
@@ -520,5 +520,5 @@ module.exports = {
       console.log(error);
       return { success: false, message: error?.response?.data || error?.response || error };
     }
-  },
+  }
 };

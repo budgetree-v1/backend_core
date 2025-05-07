@@ -6,10 +6,10 @@ const Router = express.Router();
 
 Router.post("/singlePayout", jwt.verify, transactionController.singlePayout);
 Router.post("/bulkPayout", jwt.verify, uploadController.upload.single("file"), transactionController.bulkPayout);
-Router.post("/addBenificiary", jwt.verify, transactionController.addBenificiary);
-Router.get("/benificiary", jwt.verify, transactionController.getBenificiary);
+// Router.post("/addBenificiary", jwt.verify, transactionController.addBenificiary);
+// Router.get("/benificiary", jwt.verify, transactionController.getBenificiary);
 Router.get("/getBenificiaryList", jwt.verify, transactionController.getBenificiaryList);
 
-Router.post("/listTransaction", jwt.verify, transactionController.listTransaction);
+Router.get("/listTransaction", jwt.verify, transactionController.listTransaction);
 
 module.exports = Router;

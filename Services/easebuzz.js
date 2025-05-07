@@ -1,6 +1,6 @@
 const { easebuzzWireKey, easebuzzBase, easebuzzWireSecret } = require("../Configs");
 const crypto = require("crypto");
-
+const axios = require("axios");
 module.exports = {
   singlePayoutEasebuzz: async ({ mode = "", amount = "", txnId = "", beneAcc = "", beneIfsc = "", vpa = "" }) => {
     try {
@@ -12,11 +12,11 @@ module.exports = {
         upi_handle: vpa,
         unique_request_number: txnId,
         payment_mode: mode.toUpperCase(),
-        amount: amount,
+        amount: amount
       };
 
       let signature = `${data.key}|${data.account_number}|${data.ifsc}|${data.upi_handle}|${data.unique_request_number}|${data.amount}|${easebuzzWireSecret}`;
-      signature = crypto.createHash("sha512").update(data).digest("hex");
+      signature = crypto.createHash("sha512").update(signature).digest("hex");
 
       const response = await axios({
         method: "post",
@@ -24,9 +24,9 @@ module.exports = {
         headers: {
           "Content-Type": "application/json",
           Authorization: signature,
-          "WIRE-API-KEY": easebuzzWireKey,
+          "WIRE-API-KEY": easebuzzWireKey
         },
-        data: data,
+        data: data
       });
       console.log("repsone", response);
       if (response.data?.success) {
@@ -38,8 +38,8 @@ module.exports = {
       console.log(error);
       return {
         success: false,
-        message: error?.response?.data || error?.response || error,
+        message: error?.response?.data?.message || error?.response?.data || error?.response || error
       };
     }
-  },
+  }
 };

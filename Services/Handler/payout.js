@@ -16,7 +16,7 @@ module.exports = {
       if (!amount || amount < 0)
         return {
           success: false,
-          message: "Amount should be greater than or equal to 1!",
+          message: "Amount should be greater than or equal to 1!"
         };
 
       if (mode == "imps" || mode == "neft" || mode == "rtgs") {
@@ -26,7 +26,7 @@ module.exports = {
           if (amount < 200000) {
             return {
               status: false,
-              message: `RTGS payment should be more than Rs.200000!`,
+              message: `RTGS payment should be more than Rs.200000!`
             };
           }
         }
@@ -63,7 +63,7 @@ module.exports = {
         sendType: 1, //1 app 2 api
 
         partnerStatus: "",
-        partnerMessage: "",
+        partnerMessage: ""
       };
 
       let crt = await db.Transaction.create(qry);
@@ -110,13 +110,9 @@ module.exports = {
       totalCharge = charge + gst;
       let totalAmount = parseFloat(parseFloat(amount).toFixed(2)) + parseFloat(totalCharge.toFixed(2));
 
-      let ckb = await db.User.countDocuments({
-        balance: { $gte: totalAmount },
-        _id: uId,
-      });
-
+      let ckb = await db.User.countDocuments({ balance: { $gte: totalAmount }, _id: uId });
       console.log("ckb", ckb);
-      if (ckb !== 0) {
+      if (ckb == 0) {
         await db.Transaction.updateOne({ _id: crt._id }, { $set: { message: "Insufficient balance!" } });
         return { success: false, message: "Insufficiant balance!" };
       } else {
@@ -131,6 +127,9 @@ module.exports = {
           status: 3,
           message: "Payment initiated!",
           ref: "",
+          charge: charge,
+          gst: gst,
+          totalCharge: totalCharge
         };
 
         if (server == 1) {
@@ -140,18 +139,28 @@ module.exports = {
             txnId: ref,
             beneAcc: beneAcc,
             beneIfsc: beneIfsc,
-            vpa: vpa,
+            vpa: vpa
           });
+          console.log(pay);
+
           if (!pay.success) {
-            qry.message = "Payment faield!";
+            qry.message = pay.message ? "partner - " + pay.message : "Payment faield!";
             qry.status = 3;
+            qry.charge = 0;
+            qry.gst = 0;
+            qry.totalCharge = 0;
+
+            await db.Admin.updateOne({ income: 1 }, { $inc: { balance: -parseFloat(totalCharge.toFixed(2)) } });
+            await db.User.updateOne({ _id: uId }, { $inc: { balance: parseFloat(totalAmount.toFixed(2)) } }, { new: true }).lean();
           } else {
             if (pay.data.status == "FAILED") {
               qry.message = "Payment faield!";
               qry.status = 3;
               qry.partnerStatus = pay.data?.status || "";
               qry.partnerMessage = pay.data?.status_description || "";
-
+              qry.charge = 0;
+              qry.gst = 0;
+              qry.totalCharge = 0;
               await db.Admin.updateOne({ income: 1 }, { $inc: { balance: -parseFloat(totalCharge.toFixed(2)) } });
               await db.User.updateOne({ _id: uId }, { $inc: { balance: parseFloat(totalAmount.toFixed(2)) } }, { new: true }).lean();
             } else {
@@ -170,11 +179,18 @@ module.exports = {
             txnId: ref,
             beneAcc: beneAcc,
             beneIfsc: beneIfsc,
-            vpa: vpa,
+            vpa: vpa
           });
+          console.log(pay);
+
           if (!pay.success) {
-            qry.message = "Payment faield!";
+            qry.message = pay.message ? "partner - " + pay.message : "Payment faield!";
             qry.status = 3;
+            qry.charge = 0;
+            qry.gst = 0;
+            qry.totalCharge = 0;
+            await db.Admin.updateOne({ income: 1 }, { $inc: { balance: -parseFloat(totalCharge.toFixed(2)) } });
+            await db.User.updateOne({ _id: uId }, { $inc: { balance: parseFloat(totalAmount.toFixed(2)) } }, { new: true }).lean();
           } else {
             if (pay.data.status == "accepted") {
               qry.message = "Payment process pending!";
@@ -187,7 +203,9 @@ module.exports = {
               qry.status = 3;
               qry.partnerStatus = pay.data?.status || "";
               qry.partnerMessage = pay.data?.narration || "";
-
+              qry.charge = 0;
+              qry.gst = 0;
+              qry.totalCharge = 0;
               await db.Admin.updateOne({ income: 1 }, { $inc: { balance: -parseFloat(totalCharge.toFixed(2)) } });
               await db.User.updateOne({ _id: uId }, { $inc: { balance: parseFloat(totalAmount.toFixed(2)) } }, { new: true }).lean();
             }
@@ -206,6 +224,9 @@ module.exports = {
         gst: ckt.gst,
         totalCharge: ckt.totalCharge,
         txnId: ckt.txnId,
+        beneAccount: beneAcc,
+        beneifsc: beneIfsc,
+        mode: mode
       };
 
       return { success: true, data: out };
@@ -213,8 +234,8 @@ module.exports = {
       console.log("error", error);
       return {
         success: false,
-        message: error.message || "Failed to process the payment!",
+        message: error.message || "Failed to process the payment!"
       };
     }
-  },
+  }
 };
