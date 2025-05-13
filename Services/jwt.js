@@ -6,7 +6,7 @@ require("dotenv").config();
 const Secrete = process.env.SEC || "test";
 
 module.exports = {
-  generateNonExpire: async (obj) => {
+  generateNonExpire: async obj => {
     try {
       const token = await jwt.sign(obj, Secrete);
       return token;
@@ -15,7 +15,7 @@ module.exports = {
       return false;
     }
   },
-  generate: async (obj) => {
+  generate: async obj => {
     try {
       const token = await jwt.sign(obj, Secrete, { expiresIn: "56h" });
       return token;
@@ -80,6 +80,33 @@ module.exports = {
         if (n < 0) return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
         token = token.replace("Bearer ", "");
         verify = jwt.verify(token, Secrete);
+        console.log("verify", verify);
+      }
+      req.token = verify;
+      next();
+    } catch (error) {
+      console.log(error);
+      return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+    }
+  },
+  verifyAdmin: async (req, res, next) => {
+    try {
+      if (!req.headers || !req.headers.authorization) {
+        return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+      }
+      let verify = null;
+      if (req.token) {
+        verify = req.token;
+      } else {
+        var token = req.headers.authorization;
+        var n = token.search("Bearer ");
+        if (n < 0) return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+
+        token = token.replace("Bearer ", "");
+        verify = jwt.verify(token, Secrete);
+        if (verify.isAdmin !== 1) return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+        let ck = await db.Admin.findOne({ phone: verify.phone });
+        if (!ck) return res.json({ ...failedResponse, statusCode: 401, message: "Invalid admin" });
         console.log("verify", verify);
       }
       req.token = verify;

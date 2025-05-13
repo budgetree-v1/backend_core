@@ -18,6 +18,8 @@ module.exports = {
 
   txnRef: process.env.ENVMODE == "dev" ? "BTREFX00" : "BTREF00",
   verificationRef: process.env.ENVMODE == "dev" ? "BTVERX00" : "BTVER00",
+  beneficiaryRef: process.env.ENVMODE == "dev" ? "BTBNX00" : "BTBN00",
+
   currentGst: 18,
   pennyDropPrice: 1,
   pennyLessPrice: 1,

@@ -1,4 +1,4 @@
-const { failedResponse, successResponse, noAccess } = require("../Configs");
+const { failedResponse, successResponse, noAccess, beneficiaryRef } = require("../Configs");
 const db = require("../Models");
 const { processPayout } = require("../Services/Handler/payout");
 const { createBeneficiary, getBeneficiary } = require("../Services/cashfree");
@@ -206,21 +206,78 @@ module.exports = {
           createdAt: -1,
         })
         .skip(skip)
-        .limit(limit);
-
-      return res.send({
-        ...successResponse,
-        message: "Beneficiary List!",
-        result: callServe,
-        totalPages: Math.ceil(total / limit),
-        totalItems: total,
-      });
+        .limit(limit)
+        .lean()
+        .select("-_id -__v -createdAt -updatedAt -bId -User");
+      let arr = [];
+      for (let bene of callServe) {
+        let obj = {
+          ...bene,
+          status: bene.status == 1 ? "SUCCESS" : bene.status == 2 ? "PENDING" : "FAILED",
+          benetype: bene.benetype == 1 ? "ACCOUNT" : "VPA",
+        };
+        arr = [...arr, obj];
+      }
+      return res.send({ ...successResponse, message: "Beneficiary List!", result: arr, totalPages: Math.ceil(total / limit), totalItems: total });
     } catch (error) {
       console.log(error);
       return res.send({
         ...failedResponse,
         message: error.message || "Failed to access this!",
       });
+    }
+  },
+  addBeneficiary: async (req, res) => {
+    try {
+      let { id } = req.token;
+      let user = await db.User.findOne({ _id: id });
+      if (!user) return res.send({ ...failedResponse, message: noAccess });
+
+      let { beneType, beneAcc, beneIfsc, beneName, benePhone, beneEmail, beneVpa, needToVerify } = req.body;
+
+      if (beneType == 1) {
+        if (!beneAcc || typeof beneAcc !== "string" || beneAcc.trim() === "") return res.send({ ...failedResponse, message: "Beneficiary account is mandatory" });
+        if (!beneIfsc || typeof beneIfsc !== "string" || !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(beneIfsc.toUpperCase())) return res.send({ ...failedResponse, message: "Valid IFSC code is mandatory" });
+        if (!beneName || typeof beneName !== "string" || beneName.trim().length < 3) return res.send({ ...failedResponse, message: "Beneficiary name is mandatory and must be at least 3 characters" });
+      } else if (beneType == 2) {
+        if (!beneVpa || typeof beneVpa !== "string" || !/^[\w.-]+@[\w.-]+$/.test(beneVpa)) return res.send({ ...failedResponse, message: "VPA must be valid (e.g., name@bank)" });
+      } else {
+        return res.send({ ...failedResponse, message: "Beneficiary type invalid!" });
+      }
+
+      if (benePhone && (typeof benePhone !== "string" || !/^[6-9]\d{9}$/.test(benePhone))) return res.send({ ...failedResponse, message: "Valid 10-digit mobile number is required" });
+      if (beneEmail && (typeof beneEmail !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(beneEmail))) return res.send({ ...failedResponse, message: "If provided, email must be valid" });
+
+      let crt = await db.Beneficiary.create({
+        User: id,
+        beneficiaryId: "",
+        benetype: beneType,
+        beneName: beneName,
+        beneAccount: beneAcc,
+        beneIfsc: beneIfsc,
+        beneVpa: beneVpa,
+        benePhone: benePhone,
+        beneEmail: beneEmail,
+        status: 2,
+      });
+      await db.Beneficiary.updateOne({ _id: crt._id }, { beneficiaryId: `${beneficiaryRef}${crt.bId}` });
+      if (needToVerify == true) {
+        let pless = await pennyLessHandler({ uId: id, beneAcc: beneAcc, beneIfsc: beneIfsc });
+        if (pless.data.status == "FAILED") {
+          let pdrop = await pennyDropHandler({ uId: id, beneAcc: beneAcc, beneIfsc: beneIfsc });
+          if (pdrop.data.status == "FAILED") {
+            await db.Beneficiary.deleteOne({ _id: crt._id }).lean();
+            return res.send({ ...failedResponse, message: "Beneficiary addition failed!" });
+          }
+        }
+      } else {
+        await db.Beneficiary.updateOne({ _id: crt._id }, { status: 1 }).lean();
+      }
+      let bene = await db.Beneficiary.findOne({ _id: crt._id }).lean().select("-_id -__v -createdAt -updatedAt -bId -User");
+      return res.send({ ...successResponse, message: "Beneficiary added!", result: bene });
+    } catch (error) {
+      console.log(error);
+      return res.send({ ...failedResponse, message: error.message || "Failed to access this!" });
     }
   },
   listTransaction: async (req, res) => {

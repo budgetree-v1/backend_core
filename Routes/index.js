@@ -4,5 +4,6 @@ module.exports = {
   transactionRoutes: require("./transactionRoutes"),
   walletRoutes: require("./walletRoutes"),
   api: require("./api"),
-  verificationRoutes: require("./verificationRoutes")
+  verificationRoutes: require("./verificationRoutes"),
+  adminRoutes: require("./adminRoutes"),
 };

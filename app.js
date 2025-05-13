@@ -33,12 +33,13 @@ app.use("/api/user", apiRoutes.userRoutes);
 app.use("/api/txn", apiRoutes.transactionRoutes);
 app.use("/api", apiRoutes.api);
 app.use("/api/verify", apiRoutes.verificationRoutes);
+app.use("/api/admin", apiRoutes.adminRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
     ...failedResponse,
     statusCode: 404,
-    message: "URL Not Found"
+    message: "URL Not Found",
   });
 });
 
@@ -48,7 +49,7 @@ app.use((err, req, res, next) => {
   res.json({
     ...failedResponse,
     statusCode: 500,
-    message: "Internal server error"
+    message: "Internal server error",
   });
 });
 
