@@ -248,6 +248,14 @@ module.exports = {
       if (benePhone && (typeof benePhone !== "string" || !/^[6-9]\d{9}$/.test(benePhone))) return res.send({ ...failedResponse, message: "Valid 10-digit mobile number is required" });
       if (beneEmail && (typeof beneEmail !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(beneEmail))) return res.send({ ...failedResponse, message: "If provided, email must be valid" });
 
+      let ckEx;
+      if (beneType == 1) {
+        ckEx = await db.Beneficiary.countDocuments({ User: id, beneAccount: beneAcc, beneIfsc: beneIfsc });
+      } else {
+        ckEx = await db.Beneficiary.countDocuments({ User: id, beneVpa: beneVpa });
+      }
+      if (ckEx !== 0) return res.send({ ...failedResponse, message: "Beneficiary alsready exists!" });
+
       let crt = await db.Beneficiary.create({
         User: id,
         beneficiaryId: "",
