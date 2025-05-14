@@ -1,5 +1,6 @@
 const { successResponse, failedResponse, noAccess } = require("../Configs");
 const db = require("../Models");
+const { panPremiumHandler } = require("../Services/Handler/verification");
 const jwt = require("../Services/jwt");
 require("dotenv").config();
 
@@ -19,7 +20,7 @@ module.exports = {
       if (ck) return res.send({ ...failedResponse, message: "Phone already exist!" });
 
       let obj = {
-        phone: phone
+        phone: phone,
       };
 
       obj = await jwt.generate(obj);
@@ -44,7 +45,7 @@ module.exports = {
       if (!ck) return res.send({ ...failedResponse, message: noAccess });
 
       let obj = {
-        phone: phone
+        phone: phone,
       };
       obj = await jwt.generate(obj);
       return res.send({ ...successResponse, message: "OTP sent", result: {}, token: obj });
@@ -95,7 +96,7 @@ module.exports = {
           btNeftMin: 0.1,
           btRtgsMin: 0.1,
 
-          btPennyDrop: 0.1
+          btPennyDrop: 0.1,
         };
 
         ck = await db.User.create(qry);
@@ -107,7 +108,7 @@ module.exports = {
         id: ck._id,
         auth: true,
         user: 1,
-        session: ck.session + 1
+        session: ck.session + 1,
       };
       obj = await jwt.generate(obj);
       return res.send({ ...successResponse, message: "OTP verified", result: ck, token: obj });
@@ -115,5 +116,49 @@ module.exports = {
       console.log(error);
       return res.send({ ...failedResponse });
     }
-  }
+  },
+  panKyc: async (req, res) => {
+    try {
+      let { id } = req.token;
+
+      let user = await db.User.findOne({ _id: id });
+      if (!user) return res.send({ ...failedResponse, message: noAccess });
+
+      let { pan, name, email } = req.body;
+
+      if (typeof email !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.send({ ...failedResponse, message: "If provided, email must be valid" });
+      if (typeof pan !== "string" || !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan)) return res.send({ ...failedResponse, message: "If provided, pan must be valid" });
+      if (!name) return res.send({ ...failedResponse, message: "Name value mandatory" });
+
+      let ck = await db.User.findOne({ _id: id });
+
+      //  panPremiumHandler: async ({ uId = "", pan = "", name = "", sendType = 1 }) => {
+
+      let verifyPan = await panPremiumHandler({ uId: id, pan: pan, name: name, sendType: 3 });
+      console.log(verifyPan);
+
+      if (!verifyPan.success) {
+        return res.send({ ...failedResponse, message: verifyPan.message || "Unable to verify your pan details!" });
+      }
+
+      let ckkyc = await db.UserKyc.create({
+        User: id,
+        pan: pan.toUpperCase() || "",
+        address: verifyPan?.data?.address?.full_address || "",
+        name: verifyPan?.data?.registered_name || "",
+        dob: verifyPan?.data?.date_of_birth || "",
+        gender: verifyPan?.data?.gender || "",
+        panType: verifyPan?.data?.type || "",
+
+        isKycVerified: 1, //1 yes 2 no
+      });
+
+      await db.User.updateOne({ _id: id }, { isKycVerified: 1, fullName: name });
+
+      return res.send({ ...successResponse, message: "Kyc verified", result: ckkyc });
+    } catch (error) {
+      console.log(error);
+      return res.send({ ...failedResponse });
+    }
+  },
 };

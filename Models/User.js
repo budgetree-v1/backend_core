@@ -3,6 +3,7 @@ const Schema = mongoose.Schema;
 
 const User = new Schema(
   {
+    fullName: String,
     firstName: String,
     lastName: String,
     phone: String,
@@ -11,6 +12,7 @@ const User = new Schema(
     isOtpSent: Number, //1 yes 2 no
     session: Number,
 
+    isKycVerified: Number, //1 yes 2 no
     btUpiMin: Number,
     btUpi24999: Number,
     btUpi49999: Number,

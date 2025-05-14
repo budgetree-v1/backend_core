@@ -114,7 +114,7 @@ module.exports = {
       const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
       if (!panRegex.test(pan.toUpperCase())) return { success: false, message: "Invalid pan format" };
 
-      let charge = panPremiumPrice;
+      let charge = sendType == 3 ? 0 : panPremiumPrice;
       let totalCharge = 0;
       let gst = 0;
 
@@ -136,7 +136,7 @@ module.exports = {
         gst: gst,
         totalCharge: totalCharge,
 
-        sendType: sendType, //1 app 2 api
+        sendType: sendType, //1 app 2 api 3 internal
 
         partnerStatus: "",
         partnerMessage: "",
@@ -169,7 +169,7 @@ module.exports = {
         let call = await panPremium({ pan: pan, name: name, ref: ref });
         console.log(call);
 
-        if (call.success) {
+        if (call.success && call.data) {
           await db.Verification.updateOne(
             { _id: crt._id },
             {

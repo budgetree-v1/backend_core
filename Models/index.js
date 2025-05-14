@@ -7,5 +7,6 @@ module.exports = {
   Server: require("./Server"),
   api: require("./api"),
   Webhook: require("./Webhook"),
-  Verification: require("./Verification")
+  Verification: require("./Verification"),
+  UserKyc: require("./UserKyc"),
 };
