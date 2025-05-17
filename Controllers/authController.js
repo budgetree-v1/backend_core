@@ -34,7 +34,6 @@ module.exports = {
       return res.send({ ...failedResponse });
     }
   },
-
   login: async (req, res) => {
     try {
       let { phone } = req.body;
@@ -46,6 +45,26 @@ module.exports = {
 
       let obj = {
         phone: phone,
+      };
+      obj = await jwt.generate(obj);
+      return res.send({ ...successResponse, message: "OTP sent", result: {}, token: obj });
+    } catch (error) {
+      console.log(error);
+      return res.send({ ...failedResponse });
+    }
+  },
+  memberLogin: async (req, res) => {
+    try {
+      let { phone } = req.body;
+      if (!phone) return res.send({ ...failedResponse, message: "Please enter valid phone" });
+
+      let ck = await db.Member.findOne({ phone: phone, isActive: 1 });
+      console.log(ck);
+      if (!ck) return res.send({ ...failedResponse, message: noAccess });
+
+      let obj = {
+        phone: phone,
+        isMember: 1,
       };
       obj = await jwt.generate(obj);
       return res.send({ ...successResponse, message: "OTP sent", result: {}, token: obj });
@@ -117,6 +136,41 @@ module.exports = {
       return res.send({ ...failedResponse });
     }
   },
+  memberOtpVerify: async (req, res) => {
+    try {
+      let { phone, isMember } = req.token;
+      if (isMember !== 1) return res.send({ ...failedResponse, message: noAccess });
+
+      if (!phone) return res.send({ ...failedResponse, message: "Phone mandatory" });
+      const isValid = /^[6-9]\d{9}$/.test(phone);
+      if (!isValid) return res.send({ ...failedResponse, message: "Invalid phone entered!" });
+
+      let { otp } = req.body;
+      if (!otp) return res.send({ ...failedResponse, message: "OTP mandatory!" });
+      const isValidOTP = /^\d{6}$/.test(otp);
+      if (!isValidOTP) return res.send({ ...failedResponse, message: "Invalid OTP,Please check!" });
+
+      if (process.env.ENVMODE == "dev") {
+        if (otp !== "111111") return res.send({ ...failedResponse, message: "Invalid OTP,Please check!" });
+      }
+
+      let ckMem = await db.Member.findOne({ phone: phone }).lean().select("-User -createdAt -updatedAt -__v");
+
+      await db.Member.updateOne({ phone: phone }, { session: (ckMem.session ? ckMem.session : 0) + 1 }).lean();
+
+      let obj = {
+        id: ckMem._id,
+        auth: true,
+        isMember: 1,
+        session: (ckMem.session ? ckMem.session : 0) + 1,
+      };
+      obj = await jwt.generate(obj);
+      return res.send({ ...successResponse, message: "OTP verified", result: ckMem, token: obj });
+    } catch (error) {
+      console.log(error);
+      return res.send({ ...failedResponse });
+    }
+  },
   panKyc: async (req, res) => {
     try {
       let { id } = req.token;
@@ -156,6 +210,92 @@ module.exports = {
       await db.User.updateOne({ _id: id }, { isKycVerified: 1, fullName: name });
 
       return res.send({ ...successResponse, message: "Kyc verified", result: ckkyc });
+    } catch (error) {
+      console.log(error);
+      return res.send({ ...failedResponse });
+    }
+  },
+  createMember: async (req, res) => {
+    try {
+      let { id } = req.token;
+
+      let user = await db.User.findOne({ _id: id });
+      if (!user) return res.send({ ...failedResponse, message: noAccess });
+
+      let { phone, email, role } = req.body;
+
+      if (!phone) return res.send({ ...failedResponse, message: "Please enter member phone number" });
+
+      const isValid = /^[6-9]\d{9}$/.test(phone);
+      if (!isValid) return res.send({ ...failedResponse, message: "Invalid phone entered!" });
+
+      if (!role || (role !== 1 && role !== 2)) return res.send({ ...failedResponse, message: "Please enter member role" });
+
+      let ckEx = await db.Member.countDocuments({ User: id, phone: phone });
+      if (ckEx !== 0) return res.send({ ...failedResponse, message: "Member already exist" });
+
+      let crt = await db.Member.create({
+        User: id,
+        role: role, //1 admin 2 viewer
+        phone: phone,
+        email: email || "",
+        isActive: 1, //1 yes 2 no
+      });
+
+      return res.send({ ...successResponse, message: "Member created and activated", result: crt });
+    } catch (error) {
+      console.log(error);
+      return res.send({ ...failedResponse });
+    }
+  },
+  listMembers: async (req, res) => {
+    try {
+      let { id } = req.token;
+
+      let user = await db.User.findOne({ _id: id });
+      if (!user) return res.send({ ...failedResponse, message: noAccess });
+
+      let { phone, role } = req.body;
+
+      if (phone && phone !== "") {
+        const isValid = /^[6-9]\d{9}$/.test(phone);
+        if (!isValid) return res.send({ ...failedResponse, message: "Invalid phone entered!" });
+      }
+      if (role && role !== 1 && role !== 2) {
+        return res.send({ ...failedResponse, message: "Invalid role entered" });
+      }
+
+      let ckEx = await db.Member.find({ User: id }).lean().select("-updatedAt -__v -User");
+
+      return res.send({ ...successResponse, message: "Member list fetched", result: ckEx });
+    } catch (error) {
+      console.log(error);
+      return res.send({ ...failedResponse });
+    }
+  },
+  updateMember: async (req, res) => {
+    try {
+      let { id } = req.token;
+
+      let user = await db.User.findOne({ _id: id });
+      if (!user) return res.send({ ...failedResponse, message: noAccess });
+
+      let { uId, isDeleteReq, role } = req.body;
+
+      if (!uId) return res.send({ ...failedResponse, message: "Please select member!" });
+
+      let ckEx = await db.Member.findOne({ User: id, _id: uId });
+      if (!ckEx) return res.send({ ...failedResponse, message: "Member not exist" });
+      if (isDeleteReq) {
+        await db.Member.deleteOne({ User: id, _id: uId });
+        return res.send({ ...successResponse, message: "Member deleted", result: ckEx });
+      }
+
+      if (role == 1 || role == 2) {
+        await db.Member.updateOne({ User: id, _id: uId }, { role: role }).lean();
+      }
+      let ckMem = await db.Member.findOne({ User: id, _id: uId }).lean().select("-updatedAt -__v -User");
+      return res.send({ ...successResponse, message: "Member access updated", result: ckMem });
     } catch (error) {
       console.log(error);
       return res.send({ ...failedResponse });

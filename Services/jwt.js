@@ -58,8 +58,59 @@ module.exports = {
           }
         }
       }
-      console.log("verify", verify);
+      console.log("verify here", verify);
       req.token = verify;
+      next();
+    } catch (error) {
+      console.log(error);
+      return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+    }
+  },
+  verifyMember: async (req, res, next) => {
+    try {
+      if (!req.headers || !req.headers.authorization) {
+        return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+      }
+      let verify = null;
+
+      var token = req.headers.authorization;
+
+      var n = token.search("Bearer ");
+      if (n < 0) return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+      token = token.replace("Bearer ", "");
+      verify = jwt.verify(token, Secrete);
+
+      if (!verify || !verify.id) {
+        return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+      }
+      if (verify.isMember !== 1) {
+        return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+      }
+      let obj = {
+        id: "",
+        auth: true,
+        user: 2,
+      };
+
+      if (!verify.session) {
+        return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+      } else {
+        let ck = await db.Member.findOne({
+          _id: verify.id,
+          session: verify.session,
+        });
+        if (!ck) return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+
+        let ckUser = await db.User.findOne({ _id: ck.User });
+        if (!ckUser) return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+
+        obj.id = ckUser._id;
+
+        let ckAccess = await db.MemberAccess.findOne({ role: ck.role, endPoint: req.originalUrl, isActive: 1 });
+        if (!ckAccess) return res.json({ ...failedResponse, statusCode: 401, message: "You are not permitted for this API" });
+      }
+
+      req.token = obj;
       next();
     } catch (error) {
       console.log(error);

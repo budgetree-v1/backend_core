@@ -9,4 +9,6 @@ module.exports = {
   Webhook: require("./Webhook"),
   Verification: require("./Verification"),
   UserKyc: require("./UserKyc"),
+  Member: require("./Member"),
+  MemberAccess: require("./MemberAccess"),
 };
