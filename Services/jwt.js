@@ -26,6 +26,7 @@ module.exports = {
   },
   verify: async (req, res, next) => {
     try {
+      console.log("first verify here", req.headers);
       if (!req.headers || !req.headers.authorization) {
         return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
       }
@@ -33,18 +34,20 @@ module.exports = {
       if (req.token) {
         verify = req.token;
       } else {
-        var token = req.headers.authorization;
-        var n = token.search("Bearer ");
-        if (n < 0) return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+        let token = req.headers.authorization;
+        let n = token.split(" ")[1];
+
+        if (!n) return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
         token = token.replace("Bearer ", "");
         verify = jwt.verify(token, Secrete);
+        console.log("verify", verify);
 
         if (!verify || !verify.id) {
           return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
         }
-        if (!verify.user) {
-          return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
-        }
+        // if (!verify.user) {
+        //   return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
+        // }
 
         if (verify.user == 1) {
           if (!verify.session) {
@@ -52,8 +55,9 @@ module.exports = {
           } else {
             let ck = await db.User.countDocuments({
               _id: verify.id,
-              session: verify.session,
+              // session: verify.session,
             });
+            console.log("verify user", ck);
             if (ck == 0) return res.json({ ...failedResponse, statusCode: 401, message: noAccess });
           }
         }

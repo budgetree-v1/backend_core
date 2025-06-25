@@ -24,8 +24,7 @@ module.exports = {
   pennyDropPrice: 1,
   pennyLessPrice: 1,
   // cashfreeBase: process.env.ENVMODE == "dev" ? "https://sandbox.cashfree.com" : "",
-  cashfreeBase: "https://sandbox.cashfree.com/",
-
+  cashfreeBase: process.env.CASHFREE_BASE_URL,
   cashfreeClientId: process.env.CASHFREE_CLIENT_ID,
   cashfreeClientSecret: process.env.CASHFREE_CLIENT_SECRET,
 

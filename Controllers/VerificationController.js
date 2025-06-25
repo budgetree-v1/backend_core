@@ -78,6 +78,8 @@ module.exports = {
 
       let response = await aadhaarSentOtpHandler({ aadhaar: aadhaar, uId: id });
 
+      console.log("Aadhaar verification request received", response);
+
       if (response.success) {
         return res.send({ ...successResponse, message: response.message || "Document verified", result: response.data });
       } else {
@@ -98,7 +100,7 @@ module.exports = {
       let { otp, aadhaar } = req.body;
 
       let response = await aadhaarOtpVerifyHandler({ aadhaar: aadhaar, otp: otp, uId: id });
-
+      console.log("Aadhaar OTP verification request received", response);
       if (response.success) {
         return res.send({ ...successResponse, message: response.message || "Document verified", result: response.data });
       } else {
