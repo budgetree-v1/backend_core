@@ -87,7 +87,7 @@ module.exports = {
           beneficiary_postal_code: beneficiary_postal_code,
         },
       };
-      const signature = generateSignature(cashfreeClientId, "../Keys/cashfree.pem");
+      const signature = generateSignature(cashfreeClientId, "../Keys/accountId_283823_public_key.pem");
       const response = await axios({
         method: "post",
         url: `${cashfreeBase}/beneficiary`,
@@ -157,7 +157,6 @@ module.exports = {
       };
     }
   },
-
   aadhaarSendOtp: async ({ aadhaar = "" }) => {
     try {
       let data = { aadhaar_number: aadhaar };

@@ -366,7 +366,7 @@ module.exports = {
 
       if (server == 1) {
         let call = await aadhaarSendOtp({ aadhaar: aadhaar });
-        console.log("call", call);
+        console.log(call);
 
         if (call.success) {
           await db.Verification.updateOne(

@@ -45,9 +45,6 @@ module.exports = {
 
       let obj = {
         phone: phone,
-        id: ck._id,
-        session: ck.session ? 1 : 0, //if session is present then user is valid
-        user: 1, //1 yes 0 no
       };
       obj = await jwt.generate(obj);
       return res.send({ ...successResponse, message: "OTP sent", result: {}, token: obj });
